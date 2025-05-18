@@ -78,8 +78,6 @@ export const useBookStore = defineStore('book', {
       this.chapters = chapters
       // 加载新书后，默认从第一章开始
       this.currentChapterIndex = 0
-      // 同时结束加载状态
-      this.isLoading = false
       // 可以在这里触发一些副作用，比如通知阅读区域滚动到顶部
     },
 
@@ -122,7 +120,51 @@ export const useBookStore = defineStore('book', {
       this.isLoading = isLoading
     },
 
-    // TODO: 将文件读取和章节解析逻辑作为异步 action 添加到这里
-    // async loadBook(file) { ... }
+    // 异步 action，用于加载和解析小说文件
+    async loadBook(file) {
+      // 1. 设置加载状态为 true
+      this.setLoading(true)
+      this.setBookData('', []) // 清空之前的数据
+
+      try {
+        // 2. 使用 FileReader 读取文件内容
+        const reader = new FileReader()
+
+        // 将文件读取操作包装在一个 Promise 中，以便在 async/await 中使用
+        const fileContent = await new Promise((resolve, reject) => {
+          reader.onload = (event) => {
+            // 读取成功，解决 Promise 并返回文件内容
+            resolve(event.target.result)
+          }
+          reader.onerror = (error) => {
+            // 读取失败，拒绝 Promise 并返回错误
+            reject(error)
+          }
+          // 以文本形式读取文件，指定编码为 UTF-8 (可以根据需要调整)
+          reader.readAsText(file, 'UTF-8')
+        })
+
+        // 3. 解析文件内容为章节数据
+        // 调用我们单独实现的解析函数
+        const chapters = parseBookText(fileContent) // 调用解析函数
+
+        // 4. 更新 store 的状态
+        // 从文件名中提取书名
+        const bookTitle =
+          (file.name.match(/《(.*?)》/) ?? [])[1] ??
+          file.name.replace(/\.txt$/, '')
+        this.setBookData(bookTitle, chapters)
+      } catch (error) {
+        // 5. 错误处理
+        console.error('加载或解析文件失败:', error)
+        // 可以使用 Naive UI 的消息提示组件显示错误信息
+        // 例如：nMessage.error('加载文件失败');
+        // 可以清空数据或者保留之前的数据，取决于你的需求
+        this.setBookData('', [])
+      } finally {
+        // 不论成功或失败，最后都要设置 isLoading 为 false
+        this.setLoading(false)
+      }
+    },
   },
 })
