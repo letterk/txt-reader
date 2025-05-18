@@ -70,5 +70,59 @@ export const useBookStore = defineStore('book', {
   },
 
   // actions 是方法，用于修改 state 或执行异步操作
-  actions: {},
+  actions: {
+    // 设置书籍的标题和章节数据
+    // 这个 action 会在文件解析完成后被调用
+    setBookData(title, chapters) {
+      this.bookTitle = title
+      this.chapters = chapters
+      // 加载新书后，默认从第一章开始
+      this.currentChapterIndex = 0
+      // 同时结束加载状态
+      this.isLoading = false
+      // 可以在这里触发一些副作用，比如通知阅读区域滚动到顶部
+    },
+
+    // 跳转到指定的章节索引
+    goToChapter(index) {
+      // 检查索引是否有效
+      if (index >= 0 && index < this.chapters.length) {
+        this.currentChapterIndex = index
+        // 可能需要在此处或组件中触发虚拟列表的滚动
+        // this.currentScrollPosition = 0; // 如果需要重置滚动位置
+        console.log(`跳转到章节: ${index}`) // 用于调试
+      } else {
+        console.warn(`尝试跳转到无效章节索引: ${index}`)
+      }
+    },
+
+    // 跳转到上一章
+    goToPrevChapter() {
+      // 使用 getter 判断是否是第一章，如果不是，则 currentChapterIndex 减 1
+      if (!this.isFirstChapter) {
+        this.goToChapter(this.currentChapterIndex - 1)
+      }
+    },
+
+    // 跳转到下一章
+    goToNextChapter() {
+      // 使用 getter 判断是否是最后一章，如果不是，则 currentChapterIndex 加 1
+      if (!this.isLastChapter) {
+        this.goToChapter(this.currentChapterIndex + 1)
+      }
+    },
+
+    // 切换目录抽屉的显示状态
+    toggleDrawer() {
+      this.isDrawerVisible = !this.isDrawerVisible
+    },
+
+    // 设置加载状态
+    setLoading(isLoading) {
+      this.isLoading = isLoading
+    },
+
+    // TODO: 将文件读取和章节解析逻辑作为异步 action 添加到这里
+    // async loadBook(file) { ... }
+  },
 })
