@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-
+import { parseBookText } from './parser'
 // 使用 defineStore 定义并导出我们的 store
 // 'book' 是这个 store 的唯一 ID
 export const useBookStore = defineStore('book', {
@@ -153,14 +153,20 @@ export const useBookStore = defineStore('book', {
         const bookTitle =
           (file.name.match(/《(.*?)》/) ?? [])[1] ??
           file.name.replace(/\.txt$/, '')
-        this.setBookData(bookTitle, chapters)
+
+        if (chapters.length === 0) {
+          // 如果没有解析到任何章节，可能文件格式不对或者解析规则有问题
+          console.warn('未解析到任何章节！')
+          this.setBookData('解析失败', []) // 清空数据并显示解析失败
+        } else {
+          // 更新 store 的状态
+          this.setBookData(bookTitle, chapters)
+        }
       } catch (error) {
         // 5. 错误处理
         console.error('加载或解析文件失败:', error)
-        // 可以使用 Naive UI 的消息提示组件显示错误信息
-        // 例如：nMessage.error('加载文件失败');
-        // 可以清空数据或者保留之前的数据，取决于你的需求
-        this.setBookData('', [])
+        // 清空数据并显示解析失败
+        this.setBookData('加载或解析文件失败', [])
       } finally {
         // 不论成功或失败，最后都要设置 isLoading 为 false
         this.setLoading(false)
