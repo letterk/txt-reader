@@ -1,0 +1,15 @@
+# http://editorconfig.org
+
+root = true
+
+[*] # 表示对所有文件生效
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true # 保存时移除行尾多余空格
+insert_final_newline = true # 保存时在文件末尾插入一个空行
+
+[*.md] # Markdown 文件特殊处理
+trim_trailing_whitespace = false
+insert_final_newline = false
