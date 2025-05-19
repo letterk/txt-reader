@@ -3,8 +3,10 @@ import js from '@eslint/js'
 import pluginVue from 'eslint-plugin-vue'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import globals from 'globals'
+import unocss from '@unocss/eslint-config/flat'
 
 export default [
+  unocss,
   // ESLint 推荐的基本规则
   js.configs.recommended,
 
