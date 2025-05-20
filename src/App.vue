@@ -46,16 +46,19 @@
 </template>
 
 <script setup>
-  import { ref, watch } from 'vue'
+  import { ref, watch, onMounted, onUnmounted } from 'vue' // **新增点：导入生命周期钩子**
   import { useBookStore } from './stores/bookStore'
   import { NButton, NSpin } from 'naive-ui'
   import ReaderView from './components/ReaderView.vue'
   import BottomNav from './components/BottomNav.vue'
-  // **新增点：导入 DirectoryDrawer 组件**
   import DirectoryDrawer from './components/DirectoryDrawer.vue'
+  import { setupKeyboardListener } from './utils/keyboardHandler' // **新增点：导入键盘处理函数**
 
   const fileInput = ref(null)
   const bookStore = useBookStore()
+
+  // **新增点：保存清理函数的变量**
+  let cleanupKeyboardListener = null
 
   const triggerFileInput = () => {
     fileInput.value.click()
@@ -89,6 +92,23 @@
     // 立即执行一次，处理初始状态
     { immediate: true },
   )
+
+  // **新增点：mounted 钩子**
+  onMounted(() => {
+    console.log('App 组件已挂载，设置键盘监听器...')
+    // 调用 setupKeyboardListener 函数，传入 bookStore 实例
+    // 并将返回的清理函数保存到变量中
+    cleanupKeyboardListener = setupKeyboardListener(bookStore)
+  })
+
+  // **新增点：unmounted 钩子**
+  onUnmounted(() => {
+    console.log('App 组件即将卸载，移除键盘监听器...')
+    // 如果清理函数存在，就调用它
+    if (cleanupKeyboardListener) {
+      cleanupKeyboardListener()
+    }
+  })
 </script>
 
 <style scoped></style>
