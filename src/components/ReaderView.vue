@@ -17,8 +17,10 @@
       <n-virtual-list
         ref="virtualListRef"
         :items="chapterLines"
-        :item-size="20"
+        :item-size="24"
+        item-resizable
         key-field="index"
+        class="text-xl"
       >
         <template #default="{ index, item }">
           <p :key="index" class="my-2 indent-lg">
