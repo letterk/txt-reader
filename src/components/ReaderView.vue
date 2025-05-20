@@ -16,7 +16,7 @@
       <!-- 使用 n-virtual-list -->
       <n-virtual-list
         ref="virtualListRef"
-        :items="chapterLines"
+        :items="bookStore.currentChapterLines"
         :item-size="24"
         item-resizable
         key-field="index"
@@ -33,23 +33,12 @@
 </template>
 
 <script setup>
-  import { ref, computed, watch } from 'vue' // 引入 ref, computed, watch
-  import { useBookStore } from '../stores/bookStore' // 导入 store
-  import { NVirtualList } from 'naive-ui' // 导入 Naive UI 组件，包括 NVirtualList
+  import { ref, watch } from 'vue'
+  import { useBookStore } from '../stores/bookStore'
+  import { NVirtualList } from 'naive-ui'
 
-  const bookStore = useBookStore() // 获取 store 实例
+  const bookStore = useBookStore()
 
-  // 将当前章节内容按行分割
-  // 确保过滤掉空行
-  const chapterLines = computed(() => {
-    const content = bookStore.currentChapterContent
-    // 如果内容存在，按行分割，并过滤掉只有空白字符的行，否则返回空数组
-    return content
-      ? content.split('\n').filter((line) => line.trim() !== '')
-      : []
-  })
-
-  // 创建一个 ref 来引用虚拟列表组件实例
   const virtualListRef = ref(null)
 
   // 监听当前章节索引的变化

@@ -35,14 +35,6 @@ export const useBookStore = defineStore('book', {
       return null // 如果没有章节或索引无效，返回 null
     },
 
-    // 获取当前章节的纯文本内容
-    currentChapterContent: (state) => {
-      // 通过 currentChapter getter 获取当前章节对象，然后返回其 content
-      // 注意：getter 中可以调用其他 getter (通过 this)，但这里直接访问 state 更简洁
-      const current = state.chapters[state.currentChapterIndex]
-      return current ? current.content : '' // 如果没有当前章节，返回空字符串
-    },
-
     // 判断当前是否是第一章
     isFirstChapter: (state) => {
       // 只有当 chapters 数组不为空且当前索引为 0 时，才是第一章
@@ -66,6 +58,14 @@ export const useBookStore = defineStore('book', {
         title: chapter.title,
         index: index, // 同时保存索引，方便跳转
       }))
+    },
+
+    // 获取当前章节的行数组
+    currentChapterLines: (state) => {
+      const content = state.chapters[state.currentChapterIndex]?.content || ''
+      return content
+        ? content.split('\n').filter((line) => line.trim() !== '')
+        : []
     },
   },
 
