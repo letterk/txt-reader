@@ -67,11 +67,17 @@
 
 ### 阶段 7：键盘事件绑定
 
-- [ ] 在 `App.vue` 的 `mounted` 钩子中，使用 `window.addEventListener('keydown', handleKeyDown)` 添加全局键盘监听器。
-- [ ] 实现 `handleKeyDown` 函数，根据 `event.key` 判断按键。
-- [ ] 在 `handleKeyDown` 中调用 Pinia store 的 `goToPrevChapter`, `goToNextChapter`, `toggleDrawer` actions。
-- [ ] 在 `handleKeyDown` 中使用 `event.preventDefault()` 阻止默认浏览器行为（例如 Space 键）。
-- [ ] 在 `App.vue` 的 `unmounted` 钩子中，使用 `window.removeEventListener('keydown', handleKeyDown)` 移除监听器。
+- [ ] 创建 `src/utils/keyboardHandler.js` 文件。
+- [ ] 在 `src/utils/keyboardHandler.js` 中，实现 `setupKeyboardListener` 函数，接收 Pinia Store 实例。
+- [ ] 在 `setupKeyboardListener` 中添加全局键盘监听器 `window.addEventListener('keydown', handleKeyDown)`。
+- [ ] 实现 `handleKeyDown` 函数，根据 `event.key` 判断按键（`ArrowLeft`, `ArrowRight`, `Enter`）。
+- [ ] 在 `handleKeyDown` 中调用对应的 Pinia store actions (`goToPrevChapter`, `goToNextChapter`, `toggleDrawer`)。
+- [ ] 在 `handleKeyDown` 中对处理的按键使用 `event.preventDefault()` 阻止默认行为。
+- [ ] 在 `setupKeyboardListener` 中返回一个清理函数 `cleanup`。
+- [ ] 在 `App.vue` 的 `mounted` 钩子中调用 `setupKeyboardListener` 并保存清理函数。
+- [ ] 在 `App.vue` 的 `unmounted` 钩子中调用清理函数。
+
+**下一步:** 测试键盘快捷键是否正常工作。
 
 **下一步:** 实现键盘快捷键功能，提升用户阅读体验。
 
