@@ -17,17 +17,14 @@
       <n-virtual-list
         ref="virtualListRef"
         :items="chapterLines"
-        :item-size="40"
+        :item-size="20"
         key-field="index"
-        class="px-4"
-        #="{ item, index }"
       >
-        <!-- 渲染每一行内容 -->
-        <!-- item 就是 chapterLines 数组中的每一项（每一行文本） -->
-        <!-- index 是当前行的索引 -->
-        <p class="my-2 indent-lg">
-          {{ item }}
-        </p>
+        <template #default="{ index, item }">
+          <p :key="index" class="my-2 indent-lg">
+            {{ item }}
+          </p>
+        </template>
       </n-virtual-list>
     </div>
   </div>
