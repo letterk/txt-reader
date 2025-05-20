@@ -88,7 +88,7 @@
 
 ### 阶段 5：虚拟列表集成
 
-- [ ] 选择一个 Vue 3 兼容的虚拟列表库 (例如 `vue-virtual-scroller`, `vue-recycle-scroller`) 并安装。
+- [ ] 使用 Naive UI组件库的虚拟列表 ( `n-virtual-list`) 。
 - [ ] 在 `ReaderView.vue` 或 Pinia store 中，将当前章节内容按行分割成数组，作为虚拟列表的数据源。
 - [ ] 在 `ReaderView.vue` 中，用选定的虚拟列表组件替换当前简单的 `v-for` 内容渲染。
 - [ ] 研究虚拟列表库的文档，找到编程控制滚动位置的方法 (例如 `scrollToItem` 或 `scrollToPosition`)。
