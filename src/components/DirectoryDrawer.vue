@@ -1,8 +1,11 @@
 <!-- src/components/DirectoryDrawer.vue -->
 <template>
-  <!-- 这里我们将使用 Naive UI 的 n-drawer 组件 -->
-  <n-drawer v-model:show="showDrawer" :width="300" placement="right">
-    <!-- 抽屉内部的内容区域 -->
+  <n-drawer
+    v-model:show="bookStore.isDrawerVisible"
+    :width="300"
+    placement="right"
+    @update:show="handleDrawerUpdateShow"
+  >
     <n-drawer-content title="目录">
       <!-- 目录列表将放在这里 -->
       <p>这里是目录内容</p>
@@ -11,16 +14,27 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  // import { ref } from 'vue' // **修改点：不再需要 ref 来控制显示状态**
   import { NDrawer, NDrawerContent } from 'naive-ui'
+  import { useBookStore } from '../stores/bookStore' // **新增点：导入 Pinia Store**
 
-  // 我们需要一个响应式变量来控制抽屉的显示/隐藏
-  const showDrawer = ref(false)
+  // **新增点：获取 Pinia Store 实例**
+  const bookStore = useBookStore()
 
-  // 为了在 App.vue 中使用这个组件并控制它，我们需要把 showDrawer 暴露出去
-  // 但是更好的方式是通过 Pinia Store 来管理状态，稍后我们会改动这里。
+  // **新增点：处理抽屉关闭的函数**
+  // 当 n-drawer 的 v-model:show 值发生变化时，会触发 update:show 事件
+  // 特别是当用户点击蒙层或按 Esc 关闭抽屉时，n-drawer 会将新的状态 (false) 传递过来
+  // 我们需要确保 Store 中的状态也同步更新
+  const handleDrawerUpdateShow = (show) => {
+    // 如果抽屉变为隐藏状态 (show 是 false)
+    if (!show) {
+      // 调用 Store 的 action 来同步关闭状态
+      bookStore.isDrawerVisible = false // 直接修改 state 也可以，因为是简单的 boolean
+      // 或者调用 action 如果有更复杂的逻辑: bookStore.toggleDrawer()
+    }
+  }
 </script>
 
 <style scoped>
-  /* 抽屉组件的样式，通常由 Naive UI 控制 */
+  /* 抽屉组件的样式 */
 </style>
