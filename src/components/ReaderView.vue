@@ -10,24 +10,22 @@
       {{ bookStore.currentChapter?.title || '请选择小说文件' }}
     </h2>
 
-    <!-- 虚拟列表容器，需要设置高度并允许滚动 -->
+    <!-- 内容区域容器，需要设置高度并允许滚动 -->
     <!-- flex-grow 让其占据剩余空间，overflow-y-auto 让其内部内容溢出时出现垂直滚动条 -->
-    <div class="flex-grow overflow-y-auto">
-      <!-- 使用 n-virtual-list -->
-      <n-virtual-list
-        ref="virtualListRef"
-        :items="bookStore.currentChapterLines"
-        :item-size="24"
-        item-resizable
-        key-field="index"
-        class="text-xl"
+    <!-- **修改点：移除虚拟列表，使用 v-for** -->
+    <div ref="contentContainerRef" class="flex-grow overflow-y-auto text-xl">
+      <!-- 使用 v-for 遍历章节内容行 -->
+      <!-- bookStore.currentChapterLines 是按行分割的数组 -->
+      <!-- key 绑定到 index 可以帮助 Vue 更好地管理列表元素 -->
+      <!-- indent-lg 是 UnoCSS 原子类，用于首行缩进 -->
+      <p
+        v-for="(line, index) in bookStore.currentChapterLines"
+        :key="index"
+        class="my-2 indent-lg"
       >
-        <template #default="{ index, item }">
-          <p :key="index" class="my-2 indent-lg">
-            {{ item }}
-          </p>
-        </template>
-      </n-virtual-list>
+        {{ line }}
+      </p>
+      <!-- **修改点：结束 v-for 渲染** -->
     </div>
   </div>
 </template>
@@ -35,34 +33,51 @@
 <script setup>
   import { ref, watch } from 'vue'
   import { useBookStore } from '../stores/bookStore'
-  import { NVirtualList } from 'naive-ui'
+  // **修改点：移除对 NVirtualList 的导入**
+  // import { NVirtualList } from 'naive-ui'
 
   const bookStore = useBookStore()
 
-  const virtualListRef = ref(null)
+  // **新增点：获取内容容器的引用，用于滚动**
+  const contentContainerRef = ref(null)
 
   // 监听当前章节索引的变化
   watch(
     () => bookStore.currentChapterIndex,
     (newIndex, oldIndex) => {
-      // 当章节索引变化时执行
       console.log(`章节从索引 ${oldIndex} 切换到 ${newIndex}`)
 
-      // 确保虚拟列表组件已经渲染并且获取到了引用
-      if (virtualListRef.value) {
-        // 使用 scrollTo 方法滚动到列表顶部
-        virtualListRef.value.scrollTo({ position: 'top' })
-        console.log('虚拟列表已滚动到顶部')
+      // **修改点：滚动内容容器到顶部**
+      // 当章节变化时，将可滚动的 div 容器滚动到顶部
+      if (contentContainerRef.value) {
+        contentContainerRef.value.scrollTop = 0
+        console.log('内容区域已滚动到顶部')
       }
     },
     {
       immediate: true, // 初始加载时执行
-      flush: 'post', // 在 DOM 更新后执行 watch 回调，确保虚拟列表已经渲染
+      // flush: 'post', // **修改点：不再需要 post flush，因为不是虚拟列表**
     },
   )
+
+  // **修改点：移除对 virtualListRef 的引用和相关逻辑**
+  // const virtualListRef = ref(null)
+  // watch(
+  //   () => bookStore.currentChapterIndex,
+  //   (newIndex, oldIndex) => {
+  //     console.log(`章节从索引 ${oldIndex} 切换到 ${newIndex}`)
+  //     if (virtualListRef.value) {
+  //       virtualListRef.value.scrollTo({ position: 'top' })
+  //       console.log('虚拟列表已滚动到顶部')
+  //     }
+  //   },
+  //   {
+  //     immediate: true,
+  //     flush: 'post',
+  //   },
+  // )
 </script>
 
 <style scoped>
   /* 尽量避免在这里写样式 */
-  /* Naive UI 组件自带样式，UnoCSS 原子类直接在 class 中 */
 </style>
