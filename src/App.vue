@@ -40,8 +40,8 @@
       <BottomNav />
     </footer>
 
-    <!-- 目录抽屉 -->
-    <!-- <DirectoryDrawer /> -->
+    <!-- **修改点：取消注释并导入 DirectoryDrawer 组件** -->
+    <DirectoryDrawer />
   </div>
 </template>
 
@@ -51,6 +51,8 @@
   import { NButton, NSpin } from 'naive-ui'
   import ReaderView from './components/ReaderView.vue'
   import BottomNav from './components/BottomNav.vue'
+  // **新增点：导入 DirectoryDrawer 组件**
+  import DirectoryDrawer from './components/DirectoryDrawer.vue'
 
   const fileInput = ref(null)
   const bookStore = useBookStore()
