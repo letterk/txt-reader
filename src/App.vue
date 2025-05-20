@@ -1,74 +1,112 @@
+<!-- src/App.vue -->
 <template>
-  <div>
-    <h1>简单小说阅读器</h1>
-
-    <!-- 文件输入元素，隐藏起来 -->
-    <input type="file" ref="fileInput" @change="handleFileChange" accept=".txt" style="display: none;" />
-
-    <!-- 按钮，点击时触发文件输入元素的点击事件 -->
-    <n-button @click="triggerFileInput" :disabled="bookStore.isLoading">
-      {{ bookStore.isLoading ? '正在加载...' : '选择小说文件' }}
-    </n-button>
-
-    <!-- 显示书名 -->
-    <h2 v-if="bookStore.bookTitle">{{ bookStore.bookTitle }}</h2>
-
-    <!-- 阅读区域和底部导航将在后面添加 -->
-    <!-- <ReaderView /> -->
-    <!-- <BottomNav /> -->
-
-    <!-- 目录抽屉也将在后面添加 -->
-    <!-- <DirectoryDrawer /> -->
-
-    <!-- 加载指示器 -->
-    <n-spin :show="bookStore.isLoading">
-      <!-- 如果isLoading为true，n-spin会显示加载动画并遮罩其内容 -->
-      <!-- 阅读区域和底部导航可以放在这里面，表示在加载时这些区域被遮罩 -->
-      <div v-if="bookStore.bookTitle">
-        <!-- 这里是主要内容区域，比如你的 ReaderView 组件 -->
-        <p>这里是显示当前章节内容的地方 (暂时)</p>
-        <p>当前章节索引: {{ bookStore.currentChapterIndex }}</p>
-        <p>当前章节标题: {{ bookStore.currentChapter?.title || '无' }}</p>
-        <!-- <ReaderView /> -->
+  <n-layout class="mx-auto min-h-screen w-800px">
+    <n-layout-header
+      v-if="!bookStore.bookTitle"
+      bordered
+      class="py-2 text-center"
+    >
+      <div>
+        <h1 class="text-2xl font-bold">
+          {{ '简单小说阅读器' }}
+        </h1>
       </div>
-    </n-spin>
+    </n-layout-header>
 
+    <!-- 主要内容区域 -->
+    <n-layout-content>
+      <input
+        ref="fileInput"
+        type="file"
+        accept=".txt"
+        style="display: none"
+        @change="handleFileChange"
+      />
 
-  </div>
+      <n-flex
+        v-if="!bookStore.isLoading && !bookStore.bookTitle"
+        justify="center"
+      >
+        <n-button type="primary" size="large" @click="triggerFileInput">
+          选择小说文件
+        </n-button>
+      </n-flex>
+
+      <n-spin :show="bookStore.isLoading">
+        <div v-if="bookStore.bookTitle">
+          <ReaderView />
+        </div>
+      </n-spin>
+    </n-layout-content>
+    <!-- 导航栏 -->
+    <n-layout-footer v-if="bookStore.bookTitle">
+      <BottomNav />
+    </n-layout-footer>
+
+    <!-- 目录抽屉将在这里添加 -->
+    <!-- <DirectoryDrawer /> -->
+  </n-layout>
 </template>
 
 <script setup>
-import { NButton, NSpin } from 'naive-ui'; // 导入 Naive UI 组件
-import { ref } from 'vue';
-import { useBookStore } from './stores/bookStore'; // 导入 store
+  import { ref, watch } from 'vue'
+  import { useBookStore } from './stores/bookStore'
+  import {
+    NButton,
+    NSpin,
+    NLayout,
+    NLayoutHeader,
+    NLayoutContent,
+    NLayoutFooter,
+    NFlex,
+  } from 'naive-ui'
+  import ReaderView from './components/ReaderView.vue'
+  import BottomNav from './components/BottomNav.vue'
 
-const fileInput = ref(null); // 用于引用隐藏的文件输入元素
-const bookStore = useBookStore(); // 获取 store 实例
+  const fileInput = ref(null)
+  const bookStore = useBookStore()
 
-// 触发文件输入元素的点击事件，打开文件选择对话框
-const triggerFileInput = () => {
-  fileInput.value.click();
-};
-
-// 文件选择后触发的事件处理函数
-const handleFileChange = (event) => {
-  const file = event.target.files[0]; // 获取用户选择的第一个文件
-  if (file) {
-    console.log('选择了文件:', file.name);
-    // 调用 store 的 loadBook action 来处理文件加载和解析
-    // 我们将在 store 中实现 loadBook action
-    bookStore.loadBook(file);
+  const triggerFileInput = () => {
+    fileInput.value.click()
   }
-};
 
-// TODO: 在 store 中实现 loadBook action
-// TODO: 添加 ReaderView, BottomNav, DirectoryDrawer 组件
+  const handleFileChange = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      bookStore.loadBook(file)
+    }
+  }
+
+  // --- 修改 watch 代码 ---
+  watch(
+    // 同时监听书名和当前章节对象
+    // 使用 getter `currentChapter` 方便获取章节标题
+    [() => bookStore.bookTitle, () => bookStore.currentChapter],
+    ([newTitle, newChapter]) => {
+      // 当书名或当前章节变化时执行
+
+      let pageTitle = '简单小说阅读器' // 默认标题
+
+      if (newTitle) {
+        // 如果有书名
+        pageTitle = newTitle
+
+        if (newChapter && newChapter.title) {
+          // 如果有当前章节且有标题，加上章节标题
+          pageTitle += ` - ${newChapter.title}`
+        }
+      }
+
+      // 更新浏览器标题
+      document.title = pageTitle
+    },
+    { immediate: true }, // 立即执行一次，处理初始状态
+  )
+  // --- watch 代码结束 ---
 </script>
 
 <style scoped>
-/* 可以添加一些基本样式，但尽量依赖 Naive UI */
-div {
-  text-align: center;
-  padding: 20px;
-}
+  /* App.vue 中的全局或布局样式 */
+  /* 注意：n-layout-content 默认可能没有滚动行为，如果内容超出屏幕，
+           可能需要给它添加 overflow-y: auto 或者让其子元素处理滚动 */
 </style>
