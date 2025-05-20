@@ -3,12 +3,12 @@
   <!-- 最外层容器，提供垂直布局和内边距 -->
   <div class="w-full flex flex-col py-2">
     <!-- 显示当前章节标题 -->
-    <h2 class="mb-4 flex-shrink-0 text-center text-2xl font-bold">
+    <h2 class="mb-4 flex-shrink-0 text-center text-4xl font-bold">
       {{ bookStore.currentChapter?.title || '请选择小说文件' }}
     </h2>
 
     <!-- 内容区域容器，现在让内容自然流动，由页面整体滚动 -->
-    <div class="text-xl">
+    <div class="text-5 line-height-7">
       <p
         v-for="(line, index) in bookStore.currentChapterLines"
         :key="index"
