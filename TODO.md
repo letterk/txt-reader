@@ -55,15 +55,15 @@
 
 ### 阶段 6：目录导航抽屉
 
-- [ ] 创建 `DirectoryDrawer.vue` 组件。
-- [ ] 在 `DirectoryDrawer.vue` 中使用 Naive UI 的 `n-drawer` 组件，并将其 `v-model:show` 绑定到 `bookStore.isDrawerVisible`。
-- [ ] 在抽屉内部，使用 Naive UI 的菜单组件 (`n-menu`) 显示 `bookStore.chaptersListForNav`。
-- [ ] 使用 `n-menu` 的 `value` 属性高亮当前章节，绑定到 `bookStore.currentChapterIndex`。
-- [ ] 为章节列表项添加 `on-update:value` 事件监听器。
-- [ ] 在点击处理函数中，调用 `bookStore.goToChapter(index)` 和 `bookStore.toggleDrawer()`。
-- [ ] 在 `App.vue` 中组合 `DirectoryDrawer` 组件。
+- [x] 创建 `DirectoryDrawer.vue` 组件。
+- [x] 在 `DirectoryDrawer.vue` 中使用 Naive UI 的 `n-drawer` 组件，并将其 `v-model:show` 绑定到 `bookStore.isDrawerVisible`。
+- [x] 在抽屉内部，使用 Naive UI 的菜单组件 (`n-menu`) 显示 `bookStore.chaptersListForNav`。
+- [x] 使用 `n-menu` 的 `value` 属性高亮当前章节，绑定到 `bookStore.currentChapterIndex`。
+- [x] 为章节列表项添加 `on-update:value` 事件监听器。
+- [x] 在点击处理函数中，调用 `bookStore.goToChapter(index)` 和 `bookStore.toggleDrawer()`。
+- [x] 在 `App.vue` 中组合 `DirectoryDrawer` 组件。
 
-**下一步:** 完成目录抽屉的 UI 和交互逻辑，确保点击目录项能够正确跳转章节并关闭抽屉。
+**下一步:** 完成目录抽屉的 UI 和交互逻辑，确保点击目录项能够正确跳转章节并关闭抽屉。**（已完成本阶段所有任务）**
 
 ### 阶段 7：键盘事件绑定
 
