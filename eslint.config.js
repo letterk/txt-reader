@@ -4,31 +4,26 @@ import pluginVue from 'eslint-plugin-vue'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import globals from 'globals'
 import unocss from '@unocss/eslint-config/flat'
-
+import pluginVuetify from 'eslint-plugin-vuetify'
 export default [
   unocss,
-  // ESLint 推荐的基本规则
   js.configs.recommended,
 
-  // Vue 3 推荐的规则 (根据需要选择 'flat/base', 'flat/essential', 'flat/strongly-recommended', 'flat/recommended')
-  // 'flat/recommended' 包含所有 essential 和 strongly-recommended 规则，更严格
   ...pluginVue.configs['flat/recommended'],
 
-  // 自定义配置
+  ...pluginVuetify.configs['flat/recommended'],
+
   {
-    files: ['**/*.{js,vue}'], // 应用于 JS 和 Vue 文件
+    files: ['**/*.{js,vue}'],
     languageOptions: {
-      ecmaVersion: 'latest', // 使用最新的 ECMAScript 版本
-      sourceType: 'module', // 使用 ES Module
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       globals: {
-        // 定义全局变量
         ...globals.browser,
         ...globals.node,
       },
     },
-    rules: {
-      // 在这里覆盖或添加自定义规则
-    },
+    rules: {},
     ignores: ['node_modules', 'dist', 'build', 'public', 'dist'],
   },
 
