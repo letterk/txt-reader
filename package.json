@@ -25,9 +25,12 @@
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-vue": "^10.1.0",
+    "eslint-plugin-vuetify": "^2.5.2",
     "globals": "^16.1.0",
     "prettier": "^3.5.3",
     "unocss": "^66.1.2",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vite-plugin-vuetify": "^2.1.1",
+    "vuetify": "^3.8.5"
   }
 }
