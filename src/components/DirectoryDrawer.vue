@@ -41,6 +41,13 @@
 
   const bookStore = useBookStore()
 
+  // 移除焦点
+  const removeFocus = () => {
+    if (document.activeElement) {
+      document.activeElement.blur()
+    }
+  }
+
   // 抽屉显示/隐藏的事件处理
   const handleDrawerUpdateShow = (newValue) => {
     bookStore.isDrawerVisible = newValue
@@ -51,12 +58,13 @@
 
   // 章节点击事件处理
   const handleChapterClick = (index) => {
-    console.log(`点击章节：跳转到章节索引 ${index}`)
     bookStore.goToChapter(index)
+    bookStore.toggleDrawer()
+
     nextTick(() => {
+      removeFocus()
       scrollToCurrentChapter()
     })
-    bookStore.toggleDrawer()
   }
 
   const scrollToCurrentChapter = () => {
@@ -69,7 +77,6 @@
         const element = document.getElementById(itemId)
         if (element) {
           element.scrollIntoView({ block: 'center' })
-          console.log(`已滚动到章节: ${bookStore.currentChapterIndex}`)
         } else {
           console.warn(`未找到章节元素: ${itemId}`)
         }
