@@ -1,59 +1,57 @@
 <!-- src/App.vue -->
 <template>
-  <!-- **修改点：移除 h-screen flex flex-col，让容器高度自适应内容** -->
-  <!-- **保留 mx-auto 和 w-800px 控制内容区域的宽度和居中** -->
-  <div class="mx-auto w-800px">
-    <!-- 头部，根据是否有书名显示/隐藏 -->
-    <!-- **修改点：移除 flex-shrink-0，让它自然排列** -->
-    <header v-if="!bookStore.bookTitle" class="py-8 text-center">
-      <h1 class="text-4xl font-bold">简单小说阅读器</h1>
-    </header>
+  <v-app>
+    <div class="mx-auto w-800px">
+      <header v-if="!bookStore.bookTitle" class="py-8 text-center">
+        <h1 class="text-4xl font-bold">简单小说阅读器</h1>
+      </header>
 
-    <!-- 主要内容区域 -->
-    <!-- **修改点：移除 flex-grow overflow-hidden，让它自然排列和滚动** -->
-    <!-- **新增点：添加 py-4 的内边距，与 header 和 footer 区分** -->
-    <main class="py-4">
-      <!-- 文件选择区域和加载状态 -->
-      <input
-        ref="fileInput"
-        type="file"
-        accept=".txt"
-        style="display: none"
-        @change="handleFileChange"
-      />
+      <main class="py-4">
+        <!-- 文件选择区域和加载状态 -->
+        <input
+          ref="fileInput"
+          type="file"
+          accept=".txt"
+          style="display: none"
+          @change="handleFileChange"
+        />
 
-      <!-- **修改点：移除 h-full，flex items-center justify-center 保留用于居中按钮** -->
-      <div
-        v-if="!bookStore.isLoading && !bookStore.bookTitle"
-        class="min-h-screen flex items-center justify-center"
-      >
-        <n-button type="primary" size="large" @click="triggerFileInput">
-          选择小说文件
-        </n-button>
-      </div>
+        <div
+          v-if="!bookStore.isLoading && !bookStore.bookTitle"
+          class="min-h-screen flex items-center justify-center"
+        >
+          <v-btn type="primary" size="large" @click="triggerFileInput">
+            选择小说文件
+          </v-btn>
+        </div>
 
-      <n-spin :show="bookStore.isLoading" class="min-h-screen">
+        <v-overlay
+          :model-value="bookStore.isLoading"
+          class="align-center justify-center"
+        >
+          <v-progress-circular
+            color="primary"
+            indeterminate
+            size="64"
+          ></v-progress-circular>
+        </v-overlay>
         <!-- ReaderView 组件，现在由内容自身撑开高度 -->
-        <!-- **修改点：移除 h-full，ReaderView 内部内容容器现在负责滚动** -->
         <ReaderView v-if="bookStore.bookTitle" />
-      </n-spin>
-    </main>
+      </main>
 
-    <!-- 底部导航栏，根据是否有书名显示/隐藏 -->
-    <!-- **修改点：移除 flex-shrink-0，让它自然排列** -->
-    <footer v-if="bookStore.bookTitle" class="py-8 text-center">
-      <BottomNav />
-    </footer>
+      <!-- 底部导航栏，根据是否有书名显示/隐藏 -->
+      <footer v-if="bookStore.bookTitle" class="py-8 text-center">
+        <BottomNav />
+      </footer>
 
-    <!-- 目录抽屉，它通常不受父容器布局影响 -->
-    <DirectoryDrawer />
-  </div>
+      <DirectoryDrawer />
+    </div>
+  </v-app>
 </template>
 
 <script setup>
   import { ref, watch, onMounted, onUnmounted } from 'vue'
   import { useBookStore } from './stores/bookStore'
-  import { NButton, NSpin } from 'naive-ui'
   import ReaderView from './components/ReaderView.vue'
   import BottomNav from './components/BottomNav.vue'
   import DirectoryDrawer from './components/DirectoryDrawer.vue'
