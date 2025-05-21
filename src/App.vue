@@ -1,50 +1,52 @@
 <!-- src/App.vue -->
 <template>
-  <div class="mx-auto w-800px">
-    <header v-if="!bookStore.bookTitle" class="py-8 text-center">
-      <h1 class="text-4xl font-bold">简单小说阅读器</h1>
-    </header>
+  <v-app>
+    <div class="mx-auto w-800px">
+      <header v-if="!bookStore.bookTitle" class="py-8 text-center">
+        <h1 class="text-4xl font-bold">简单小说阅读器</h1>
+      </header>
 
-    <main class="py-4">
-      <!-- 文件选择区域和加载状态 -->
-      <input
-        ref="fileInput"
-        type="file"
-        accept=".txt"
-        style="display: none"
-        @change="handleFileChange"
-      />
+      <main class="py-4">
+        <!-- 文件选择区域和加载状态 -->
+        <input
+          ref="fileInput"
+          type="file"
+          accept=".txt"
+          style="display: none"
+          @change="handleFileChange"
+        />
 
-      <div
-        v-if="!bookStore.isLoading && !bookStore.bookTitle"
-        class="min-h-screen flex items-center justify-center"
-      >
-        <v-btn type="primary" size="large" @click="triggerFileInput">
-          选择小说文件
-        </v-btn>
-      </div>
+        <div
+          v-if="!bookStore.isLoading && !bookStore.bookTitle"
+          class="min-h-screen flex items-center justify-center"
+        >
+          <v-btn type="primary" size="large" @click="triggerFileInput">
+            选择小说文件
+          </v-btn>
+        </div>
 
-      <v-overlay
-        :model-value="bookStore.isLoading"
-        class="align-center justify-center"
-      >
-        <v-progress-circular
-          color="primary"
-          indeterminate
-          size="64"
-        ></v-progress-circular>
-      </v-overlay>
-      <!-- ReaderView 组件，现在由内容自身撑开高度 -->
-      <ReaderView v-if="bookStore.bookTitle" />
-    </main>
+        <v-overlay
+          :model-value="bookStore.isLoading"
+          class="align-center justify-center"
+        >
+          <v-progress-circular
+            color="primary"
+            indeterminate
+            size="64"
+          ></v-progress-circular>
+        </v-overlay>
+        <!-- ReaderView 组件，现在由内容自身撑开高度 -->
+        <ReaderView v-if="bookStore.bookTitle" />
+      </main>
 
-    <!-- 底部导航栏，根据是否有书名显示/隐藏 -->
-    <footer v-if="bookStore.bookTitle" class="py-8 text-center">
-      <BottomNav />
-    </footer>
+      <!-- 底部导航栏，根据是否有书名显示/隐藏 -->
+      <footer v-if="bookStore.bookTitle" class="py-8 text-center">
+        <BottomNav />
+      </footer>
 
-    <DirectoryDrawer />
-  </div>
+      <DirectoryDrawer />
+    </div>
+  </v-app>
 </template>
 
 <script setup>
