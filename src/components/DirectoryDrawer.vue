@@ -22,6 +22,7 @@
     >
       <template #default="{ item }">
         <v-list-item
+          :id="`chapter-item-${item.index}`"
           :key="item.index"
           :value="item.index"
           :title="item.title"
@@ -35,6 +36,7 @@
 </template>
 
 <script setup>
+  import { watch, nextTick } from 'vue'
   import { useBookStore } from '../stores/bookStore'
 
   const bookStore = useBookStore()
@@ -42,14 +44,48 @@
   // 抽屉显示/隐藏的事件处理
   const handleDrawerUpdateShow = (newValue) => {
     bookStore.isDrawerVisible = newValue
+    if (newValue) {
+      scrollToCurrentChapter()
+    }
   }
 
   // 章节点击事件处理
   const handleChapterClick = (index) => {
     console.log(`点击章节：跳转到章节索引 ${index}`)
     bookStore.goToChapter(index)
+    nextTick(() => {
+      scrollToCurrentChapter()
+    })
     bookStore.toggleDrawer()
   }
+
+  const scrollToCurrentChapter = () => {
+    if (
+      bookStore.currentChapterIndex >= 0 &&
+      bookStore.chaptersListForNav.length > 0
+    ) {
+      nextTick(() => {
+        const itemId = `chapter-item-${bookStore.currentChapterIndex}`
+        const element = document.getElementById(itemId)
+        if (element) {
+          element.scrollIntoView({ block: 'center' })
+          console.log(`已滚动到章节: ${bookStore.currentChapterIndex}`)
+        } else {
+          console.warn(`未找到章节元素: ${itemId}`)
+        }
+      })
+    }
+  }
+
+  watch(
+    () => bookStore.currentChapterIndex,
+    (newIndex, oldIndex) => {
+      // 只有当章节实际变化时才触发滚动
+      if (newIndex !== oldIndex) {
+        scrollToCurrentChapter()
+      }
+    },
+  )
 </script>
 
 <style scoped>
