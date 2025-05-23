@@ -32,7 +32,7 @@
       // 确保新旧索引不同，或者这是第一次加载时（oldIndex 可能是 undefined）
       // 并且 Store 中有章节数据
       if (newIndex !== oldIndex && bookStore.chapters.length > 0) {
-        console.log(`章节从索引 ${oldIndex} 切换到 ${newIndex}, 滚动到顶部`)
+        // console.log(`章节从索引 ${oldIndex} 切换到 ${newIndex}, 滚动到顶部`)
 
         window.scrollTo(0, 0)
 

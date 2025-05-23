@@ -65,7 +65,7 @@ export function parseBookText(text) {
   }
 
   // 7. 返回解析后的章节数组
-  console.log('解析完成，总共章节数:', chapters.length)
+  // console.log('解析完成，总共章节数:', chapters.length)
   // console.log('解析后的章节数据示例:', chapters.slice(0, 5)); // 打印前5个章节看看
 
   return chapters
