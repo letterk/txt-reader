@@ -1,6 +1,6 @@
 <!-- src/App.vue -->
 <template>
-  <v-app>
+  <v-app :theme="theme">
     <div class="mx-auto w-800px">
       <header v-if="!bookStore.bookTitle" class="py-8 text-center">
         <h1 class="text-4xl font-bold">简单小说阅读器</h1>
@@ -46,6 +46,14 @@
 
       <DirectoryDrawer />
     </div>
+
+    <v-btn
+      :icon="theme === 'light' ? mdiWeatherSunny : mdiWeatherNight"
+      class="fixed left-4 top-4"
+      size="x-small"
+      @click="toggleTheme"
+    >
+    </v-btn>
   </v-app>
 </template>
 
@@ -56,9 +64,11 @@
   import BottomNav from './components/BottomNav.vue'
   import DirectoryDrawer from './components/DirectoryDrawer.vue'
   import { setupKeyboardListener } from './utils/keyboardHandler'
+  import { mdiWeatherSunny, mdiWeatherNight } from '@mdi/js'
 
   const fileInput = ref(null)
   const bookStore = useBookStore()
+  const theme = ref('dark')
 
   let cleanupKeyboardListener = null
 
@@ -71,6 +81,10 @@
     if (file) {
       bookStore.loadBook(file)
     }
+  }
+
+  const toggleTheme = () => {
+    theme.value = theme.value === 'dark' ? 'light' : 'dark'
   }
 
   watch(
