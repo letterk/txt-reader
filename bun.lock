@@ -5,14 +5,14 @@
       "name": "txt-reader",
       "dependencies": {
         "pinia": "^3.0.2",
-        "vue": "^3.5.13",
+        "vue": "^3.5.14",
       },
       "devDependencies": {
         "@eslint/js": "^9.27.0",
-        "@mdi/font": "^7.4.47",
+        "@mdi/js": "^7.4.47",
         "@unocss/eslint-config": "^66.1.2",
         "@unocss/eslint-plugin": "^66.1.2",
-        "@vitejs/plugin-vue": "^5.2.3",
+        "@vitejs/plugin-vue": "^5.2.4",
         "eslint": "^9.27.0",
         "eslint-config-prettier": "^10.1.5",
         "eslint-plugin-vue": "^10.1.0",
@@ -22,7 +22,7 @@
         "unocss": "^66.1.2",
         "vite": "^6.3.5",
         "vite-plugin-vuetify": "^2.1.1",
-        "vuetify": "^3.8.5",
+        "vuetify": "^3.8.6",
       },
     },
   },
@@ -131,7 +131,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "https://registry.npmmirror.com/@jridgewell/trace-mapping/-/trace-mapping-0.3.25.tgz", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
 
-    "@mdi/font": ["@mdi/font@7.4.47", "https://registry.npmmirror.com/@mdi/font/-/font-7.4.47.tgz", {}, "sha512-43MtGpd585SNzHZPcYowu/84Vz2a2g31TvPMTm9uTiCSWzaheQySUcSyUH/46fPnuPQWof2yd0pGBtzee/IQWw=="],
+    "@mdi/js": ["@mdi/js@7.4.47", "https://registry.npmmirror.com/@mdi/js/-/js-7.4.47.tgz", {}, "sha512-KPnNOtm5i2pMabqZxpUz7iQf+mfrYZyKCZ8QNz85czgEt7cuHcGorWfdzUMWYA0SD+a6Hn4FmJ+YhzzzjkTZrQ=="],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "https://registry.npmmirror.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 

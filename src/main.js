@@ -4,9 +4,17 @@ import { createVuetify } from 'vuetify'
 import App from './App.vue'
 import 'virtual:uno.css'
 import 'vuetify/styles'
-import '@mdi/font/css/materialdesignicons.css'
+import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
 
-const vuetify = createVuetify()
+const vuetify = createVuetify({
+  icons: {
+    defaultSet: 'mdi',
+    aliases,
+    sets: {
+      mdi,
+    },
+  },
+})
 const pinia = createPinia()
 
 createApp(App).use(pinia).use(vuetify).mount('#app')
