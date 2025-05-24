@@ -18,7 +18,7 @@
     <v-virtual-scroll
       :items="bookStore.chaptersListForNav"
       height="calc(100vh - 100px)"
-      item-height="48"
+      item-height="10"
     >
       <template #default="{ item }">
         <v-list-item
