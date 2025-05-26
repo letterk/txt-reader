@@ -2,11 +2,12 @@
 <template>
   <!-- 根据 bookStore.isDrawerVisible 控制显示/隐藏，并添加过渡效果 -->
   <div
+    id="directory-drawer"
     :class="{
       'transform translate-x-0': bookStore.isDrawerVisible,
       'transform -translate-x-full': !bookStore.isDrawerVisible,
     }"
-    class="fixed inset-y-0 left-0 z-50 w-300px overflow-y-auto bg-white shadow-lg transition-transform duration-300 ease-in-out dark:bg-gray-800"
+    class="fixed inset-y-0 left-0 z-1 w-300px overflow-y-auto bg-white shadow-lg transition-transform duration-300 ease-in-out dark:bg-gray-800"
   >
     <!-- 抽屉头部，显示书名 -->
     <div class="border-b border-gray-200 p-4 dark:border-gray-700">
@@ -28,7 +29,7 @@
           'hover:bg-gray-100 dark:hover:bg-gray-700':
             item.index !== bookStore.currentChapterIndex,
         }"
-        class="cursor-pointer truncate p-3 text-gray-800 dark:text-gray-200"
+        class="px-4 py-2 text-gray-800 dark:text-gray-200"
         @click="handleChapterClick(item.index)"
       >
         {{ item.title }}
@@ -39,7 +40,7 @@
   <!-- 抽屉外部的半透明遮罩层 -->
   <div
     v-if="bookStore.isDrawerVisible"
-    class="fixed inset-0 z-40 bg-black bg-opacity-50"
+    class="fixed inset-0 bg-black bg-opacity-50"
     @click="bookStore.toggleDrawer()"
   ></div>
 </template>
