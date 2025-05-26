@@ -4,14 +4,11 @@ import pluginVue from 'eslint-plugin-vue'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import globals from 'globals'
 import unocss from '@unocss/eslint-config/flat'
-import pluginVuetify from 'eslint-plugin-vuetify'
 export default [
   unocss,
   js.configs.recommended,
 
   ...pluginVue.configs['flat/recommended'],
-
-  ...pluginVuetify.configs['flat/recommended'],
 
   {
     files: ['**/*.{js,vue}'],
