@@ -1,34 +1,32 @@
-<!-- src/components/BottomNav.vue -->
 <template>
-  <!-- 使用 n-flex 进行水平布局 -->
-  <div class="mt-4 flex justify-center">
+  <!-- 使用 UnoCSS flex 布局 -->
+  <div class="mt-4 flex justify-center space-x-4">
     <!-- 上一章按钮 -->
-    <v-btn
+    <button
       :disabled="bookStore.isFirstChapter || bookStore.isLoading"
-      type="primary"
+      class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
       @click="bookStore.goToPrevChapter()"
     >
       上一章
-    </v-btn>
+    </button>
 
     <!-- 目录按钮 -->
-    <v-btn
-      class="mx-4"
+    <button
       :disabled="bookStore.chapters.length === 0 || bookStore.isLoading"
-      type="info"
+      class="rounded bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
       @click="bookStore.toggleDrawer()"
     >
       目录
-    </v-btn>
+    </button>
 
     <!-- 下一章按钮 -->
-    <v-btn
+    <button
       :disabled="bookStore.isLastChapter || bookStore.isLoading"
-      type="primary"
+      class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
       @click="bookStore.goToNextChapter()"
     >
       下一章
-    </v-btn>
+    </button>
   </div>
 </template>
 
@@ -36,7 +34,3 @@
   import { useBookStore } from '../stores/bookStore'
   const bookStore = useBookStore()
 </script>
-
-<style scoped>
-  /* 尽量避免在这里写样式 */
-</style>
