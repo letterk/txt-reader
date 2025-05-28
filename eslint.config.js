@@ -9,7 +9,9 @@ export default [
   js.configs.recommended,
 
   ...pluginVue.configs['flat/recommended'],
-
+  {
+    ignores: ['node_modules', 'dist', 'build', 'public'],
+  },
   {
     files: ['**/*.{js,vue}'],
     languageOptions: {
@@ -21,7 +23,6 @@ export default [
       },
     },
     rules: {},
-    ignores: ['node_modules', 'dist', 'build', 'public', 'dist'],
   },
 
   // 确保 Prettier 配置是最后一个，以覆盖其他配置中的样式规则
