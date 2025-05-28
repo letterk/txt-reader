@@ -58,9 +58,9 @@
 <script setup>
   import { ref, watch, onMounted, onUnmounted } from 'vue'
   import { useBookStore } from './stores/bookStore'
-  import ReaderView from './components/ReaderView.vue'
-  import BottomNav from './components/BottomNav.vue'
-  import DirectoryDrawer from './components/DirectoryDrawer.vue'
+  import ReaderView from './views/ReaderView.vue'
+  import BottomNav from './components/ReaderNav.vue'
+  import DirectoryDrawer from './components/ReaderToc.vue'
   import { setupKeyboardListener } from './utils/keyboardHandler'
 
   const fileInput = ref(null)
