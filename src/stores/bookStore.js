@@ -4,10 +4,8 @@ export const useBookStore = defineStore('book', {
   state: () => ({
     bookTitle: '',
     chapters: [],
-
     currentChapterId: null,
     isDrawerVisible: false,
-    isLoading: false,
   }),
   getters: {
     currentChapter: (state) => {
@@ -50,7 +48,6 @@ export const useBookStore = defineStore('book', {
         return state.chapters.map((chapter) => ({
           id: chapter.id,
           title: chapter.title,
-
           bookId: bookId,
         }))
       }
@@ -59,6 +56,7 @@ export const useBookStore = defineStore('book', {
 
     currentChapterLines: (state) => {
       const content = state.currentChapter?.content || ''
+
       return content
         ? content.split('\n').filter((line) => line.trim() !== '')
         : []
@@ -70,6 +68,7 @@ export const useBookStore = defineStore('book', {
       this.chapters = chapters
 
       this.currentChapterId = chapters.length > 0 ? chapters[0].id : null
+
       this.isDrawerVisible = false
     },
 
@@ -90,6 +89,7 @@ export const useBookStore = defineStore('book', {
     goToChapter(index) {
       if (index >= 0 && index < this.chapters.length && this.bookTitle) {
         const targetChapter = this.chapters[index]
+
         if (targetChapter && targetChapter.id !== this.currentChapterId) {
           this.goToChapterById(targetChapter.id)
         }
@@ -103,9 +103,12 @@ export const useBookStore = defineStore('book', {
 
       if (currentIndex > 0) {
         const prevChapterId = this.chapters[currentIndex - 1]?.id
+
         if (prevChapterId) {
           this.goToChapterById(prevChapterId)
         }
+      } else {
+        console.log('已经在第一章了。')
       }
     },
 
@@ -114,18 +117,17 @@ export const useBookStore = defineStore('book', {
 
       if (currentIndex !== -1 && currentIndex < this.chapters.length - 1) {
         const nextChapterId = this.chapters[currentIndex + 1]?.id
+
         if (nextChapterId) {
           this.goToChapterById(nextChapterId)
         }
+      } else {
+        console.log('已经在最后一章了。')
       }
     },
 
     toggleDrawer() {
       this.isDrawerVisible = !this.isDrawerVisible
-    },
-
-    setLoading(isLoading) {
-      this.isLoading = isLoading
     },
   },
 })

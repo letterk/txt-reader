@@ -1,21 +1,24 @@
 <template>
   <div class="w-full flex flex-col py-2">
     <h2 class="mb-4 flex-shrink-0 text-center text-4xl font-bold">
-      <span v-if="bookStore.isLoading">正在加载书籍...</span>
+      <!-- 使用组件内部的 isLoading 状态 -->
+      <span v-if="isLoading">正在加载书籍...</span>
       <span v-else-if="!bookStore.bookTitle">请选择小说文件</span>
       <span v-else>{{
         bookStore.currentChapter?.title || '章节加载中...'
       }}</span>
     </h2>
 
+    <!-- 使用组件内部的 isLoading 状态 -->
     <div
-      v-if="!bookStore.bookTitle && !bookStore.isLoading"
+      v-if="!bookStore.bookTitle && !isLoading"
       class="text-center text-gray-500"
     >
       请在书架选择一本小说阅读。
     </div>
+    <!-- 使用组件内部的 isLoading 状态 -->
     <div
-      v-else-if="bookStore.bookTitle && !bookStore.isLoading"
+      v-else-if="bookStore.bookTitle && !isLoading"
       class="text-5 line-height-7"
     >
       <!-- 使用 currentChapterLines getter 显示章节内容 -->
@@ -30,14 +33,16 @@
   </div>
 
   <!-- 只有在有书且不加载时才显示导航和目录按钮 -->
-  <ReaderNav v-if="bookStore.bookTitle && !bookStore.isLoading" />
+  <!-- 使用组件内部的 isLoading 状态 -->
+  <ReaderNav v-if="bookStore.bookTitle && !isLoading" />
 
   <!-- 只有在有书且不加载时才显示目录抽屉 -->
-  <ReaderToc v-if="bookStore.bookTitle && !bookStore.isLoading" />
+  <!-- 使用组件内部的 isLoading 状态 -->
+  <ReaderToc v-if="bookStore.bookTitle && !isLoading" />
 </template>
 
 <script setup>
-  import { watch, onMounted, onUnmounted } from 'vue'
+  import { ref, watch, onMounted, onUnmounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
 
   import { useBookStore } from '../stores/bookStore'
@@ -52,8 +57,9 @@
   const bookStore = useBookStore()
 
   const route = useRoute()
-
   const router = useRouter()
+
+  const isLoading = ref(false)
 
   const props = defineProps({
     bookId: {
@@ -63,7 +69,6 @@
     chapterId: {
       type: String,
       required: false,
-
       default: undefined,
     },
   })
@@ -75,27 +80,9 @@
         : undefined
 
     if (bookStore.chapters.length > 0 && bookStore.chapters[0]?.bookId === id) {
-      const chapterIdToGo =
-        targetChapterId !== undefined
-          ? targetChapterId
-          : bookStore.currentChapterId !== null
-            ? bookStore.currentChapterId
-            : bookStore.chapters[0]?.id
-
-      if (chapterIdToGo !== undefined) {
-        bookStore.goToChapterById(chapterIdToGo)
-      } else {
-        console.warn('无法确定要导航到的章节 ID.')
-      }
-
-      const currentChapterInStore = bookStore.currentChapter
-      const currentChapterIdInStore = currentChapterInStore
-        ? currentChapterInStore.id
-        : undefined
-
       if (
         targetChapterId !== undefined &&
-        targetChapterId !== currentChapterIdInStore
+        targetChapterId !== bookStore.currentChapterId
       ) {
         const targetChapter = bookStore.chapters.find(
           (c) => c.id === targetChapterId,
@@ -104,38 +91,35 @@
           bookStore.goToChapterById(targetChapterId)
         } else {
           console.warn(
-            `路由参数中的章节 ID ${targetChapterId} 在已加载书籍中不存在。导航到第一章。`,
+            `路由参数中的章节 ID ${targetChapterId} 在已加载书籍中不存在。`,
           )
 
           const firstChapterId = bookStore.chapters[0]?.id
           if (firstChapterId !== undefined) {
             bookStore.goToChapterById(firstChapterId)
-          } else {
-            console.error('已加载书籍没有第一章，无法导航。')
-
-            bookStore.setBookData('', [])
-            router.replace({ name: 'Bookshelf' }).catch(console.error)
           }
         }
       } else if (
         targetChapterId === undefined &&
-        currentChapterIdInStore !== undefined
-      ) {
-        updateRoute(id, currentChapterIdInStore)
-      } else if (
-        targetChapterId === undefined &&
-        currentChapterIdInStore === undefined
+        bookStore.currentChapterId === null &&
+        bookStore.chapters.length > 0
       ) {
         const firstChapterId = bookStore.chapters[0]?.id
         if (firstChapterId !== undefined) {
           bookStore.goToChapterById(firstChapterId)
         }
+      } else if (
+        targetChapterId === undefined &&
+        bookStore.currentChapterId !== null
+      ) {
+        updateRoute(id, bookStore.currentChapterId)
       }
 
       return
     }
 
-    bookStore.setLoading(true)
+    isLoading.value = true
+    bookStore.setBookData('', [])
 
     try {
       const book = await getBookById(id)
@@ -154,6 +138,7 @@
           const foundChapter = chaptersWithBookId.find(
             (c) => c.id === targetChapterId,
           )
+
           if (foundChapter) {
             finalChapterIdToLoad = targetChapterId
           } else {
@@ -161,9 +146,18 @@
               `路由参数指定的章节 ID ${targetChapterId} 不存在于书籍中。导航到第一章 (${finalChapterIdToLoad})。`,
             )
           }
+        } else {
+          console.log('路由未指定章节 ID，默认加载第一章。')
         }
 
         bookStore.goToChapterById(finalChapterIdToLoad)
+
+        updateRoute(
+          id,
+          bookStore.currentChapterId !== null
+            ? bookStore.currentChapterId
+            : finalChapterIdToLoad,
+        )
       } else {
         if (!book) {
           console.warn(`数据库中未找到书籍 ID: ${id}`)
@@ -186,7 +180,7 @@
         console.error('加载书籍失败，导航回书架页失败:', err)
       })
     } finally {
-      bookStore.setLoading(false)
+      isLoading.value = false
     }
   }
 
@@ -214,29 +208,23 @@
   let cleanupKeyboardListener = null
 
   onMounted(() => {
+    console.log('ReaderView 组件已挂载')
+
     loadBook(props.bookId, props.chapterId)
 
-    cleanupKeyboardListener = setupKeyboardListener(bookStore)
+    cleanupKeyboardListener = setupKeyboardListener(bookStore, isLoading)
 
     bookStore.isDrawerVisible = false
   })
 
   watch(
     () => props.bookId,
-    (newBookId) => {
-      if (
-        newBookId &&
-        bookStore.chapters.length > 0 &&
-        bookStore.chapters[0]?.bookId !== newBookId
-      ) {
-        loadBook(newBookId, undefined)
-      } else if (
-        newBookId &&
-        bookStore.chapters.length > 0 &&
-        bookStore.chapters[0]?.bookId === newBookId
-      ) {
-        loadBook(newBookId, undefined)
-      } else if (newBookId && bookStore.chapters.length === 0) {
+    (newBookId, oldBookId) => {
+      if (newBookId && newBookId !== oldBookId) {
+        console.log(
+          `bookId 变化：从 ${oldBookId} 到 ${newBookId}，重新加载书籍。`,
+        )
+
         loadBook(newBookId, undefined)
       }
     },
@@ -244,30 +232,33 @@
 
   watch(
     () => props.chapterId,
-    (newChapterIdStr) => {
+    (newChapterIdStr, oldChapterIdStr) => {
       const newChapterId =
         newChapterIdStr !== undefined
           ? parseInt(newChapterIdStr, 10)
           : undefined
+      const oldChapterId =
+        oldChapterIdStr !== undefined
+          ? parseInt(oldChapterIdStr, 10)
+          : undefined
 
       if (
         newChapterId !== undefined &&
+        newChapterId !== oldChapterId &&
         newChapterId !== bookStore.currentChapterId &&
         bookStore.chapters.length > 0
       ) {
+        console.log(
+          `chapterId 变化：从 ${oldChapterId} 到 ${newChapterId}，跳转章节。`,
+        )
         bookStore.goToChapterById(newChapterId)
       } else if (
         newChapterIdStr === undefined &&
-        bookStore.chapters.length > 0
+        bookStore.chapters.length > 0 &&
+        bookStore.currentChapterId !== null
       ) {
-        if (bookStore.currentChapterId !== null) {
-          updateRoute(props.bookId, bookStore.currentChapterId)
-        } else {
-          const firstChapterId = bookStore.chapters[0]?.id
-          if (firstChapterId !== undefined) {
-            bookStore.goToChapterById(firstChapterId)
-          }
-        }
+        console.log('chapterId 变为 undefined，确保路由和当前章节同步。')
+        updateRoute(props.bookId, bookStore.currentChapterId)
       }
     },
   )
@@ -279,7 +270,7 @@
         newChapterId !== null &&
         newChapterId !== oldChapterId &&
         bookStore.chapters.length > 0 &&
-        !bookStore.isLoading
+        !isLoading.value
       ) {
         const currentBookId = bookStore.chapters[0]?.bookId
 
@@ -299,8 +290,12 @@
   )
 
   onUnmounted(() => {
+    console.log('ReaderView 组件已卸载')
+
     if (cleanupKeyboardListener) {
       cleanupKeyboardListener()
     }
+
+    bookStore.setBookData('', [])
   })
 </script>
