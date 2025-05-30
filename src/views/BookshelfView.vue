@@ -1,4 +1,3 @@
-<!-- src/views/BookshelfView.vue -->
 <template>
   <!-- 书架页面的最外层容器 -->
   <div class="w-full flex flex-col py-8">
@@ -17,7 +16,7 @@
       />
       <!-- 触发文件选择的按钮 -->
       <button
-        class="rounded bg-blue-500 px-6 py-3 text-lg text-white hover:bg-blue-600"
+        class="rounded bg-blue-500 px-6 py-3 text-lg text-white disabled:cursor-not-allowed hover:bg-blue-600 disabled:opacity-50"
         :disabled="bookStore.isLoading"
         @click="triggerFileInput"
       >
@@ -51,6 +50,7 @@
           class="flex items-center justify-between border border-gray-200 rounded p-4 shadow-sm dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           <!-- 书名，点击后跳转到阅读页面 -->
+          <!-- 使用 book.id 作为路由参数 -->
           <router-link
             :to="{ name: 'Reader', params: { bookId: book.id } }"
             class="flex-grow text-lg font-medium dark:text-white"
@@ -59,7 +59,7 @@
           </router-link>
           <!-- 删除按钮 -->
           <button
-            class="ml-4 text-red-500 hover:text-red-700"
+            class="ml-4 text-red-500 disabled:cursor-not-allowed hover:text-red-700 disabled:opacity-50"
             :disabled="bookStore.isLoading"
             @click="deleteBook(book.id)"
           >
@@ -67,6 +67,16 @@
           </button>
         </li>
       </ul>
+      <!-- 清空书架按钮 -->
+      <div class="mt-8 text-center">
+        <button
+          class="rounded bg-red-500 px-4 py-2 text-white disabled:cursor-not-allowed hover:bg-red-600 disabled:opacity-50"
+          :disabled="bookStore.isLoading"
+          @click="clearAllBooks"
+        >
+          清空书架
+        </button>
+      </div>
     </div>
     <div v-else-if="!bookStore.isLoading" class="text-center text-gray-500">
       书架是空的，快上传一本小说吧！
@@ -77,7 +87,12 @@
 <script setup>
   import { ref, onMounted } from 'vue'
 
-  import { getAllBooks, addBook, deleteBookById } from '../utils/database'
+  import {
+    getAllBooks,
+    addBook,
+    deleteBookById,
+    clearBooks,
+  } from '../utils/database'
 
   import { parseBookText } from '../utils/parser'
 
@@ -86,8 +101,11 @@
   const bookStore = useBookStore()
 
   const fileInput = ref(null)
+
   const books = ref([])
+
   const uploadMessage = ref('')
+
   const uploadMessageType = ref('')
 
   const triggerFileInput = () => {
@@ -96,11 +114,15 @@
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0]
+
     if (!file) return
 
     bookStore.setLoading(true)
+
     uploadMessage.value = '正在读取文件...'
     uploadMessageType.value = ''
+
+    event.target.value = ''
 
     try {
       if (!file.name.endsWith('.txt')) {
@@ -110,6 +132,7 @@
       }
 
       const reader = new FileReader()
+
       const fileContent = await new Promise((resolve, reject) => {
         reader.onload = (event) => {
           resolve(event.target.result)
@@ -131,42 +154,32 @@
       if (chapters.length === 0) {
         uploadMessage.value = '未解析到任何章节，请检查文件格式。'
         uploadMessageType.value = 'error'
-
-        event.target.value = ''
-        return
-      }
-
-      const existingBook = books.value.find((b) => b.bookTitle === bookTitle)
-      if (existingBook) {
-        uploadMessage.value = `书架中已存在名为《${bookTitle}》的书籍。`
-        uploadMessageType.value = 'error'
-
-        event.target.value = ''
         return
       }
 
       const bookData = {
         bookTitle: bookTitle,
         chapters: chapters,
-
         uploadTime: new Date().toISOString(),
       }
 
-      const bookId = await addBook(bookData)
-      console.log(`书籍《${bookTitle}》保存成功，ID: ${bookId}`)
+      const bookId = await addBook(bookData, fileContent)
 
+      console.log(`书籍《${bookTitle}》保存成功，ID: ${bookId}`)
       uploadMessage.value = `书籍《${bookTitle}》上传并保存成功！`
       uploadMessageType.value = 'success'
 
       await fetchBooks()
-
-      event.target.value = ''
     } catch (error) {
       console.error('处理文件失败:', error)
-      uploadMessage.value = `文件处理失败: ${error.message}`
-      uploadMessageType.value = 'error'
 
-      event.target.value = ''
+      if (error.isDuplicate) {
+        uploadMessage.value = error.message
+        uploadMessageType.value = 'error'
+      } else {
+        uploadMessage.value = `文件处理失败: ${error.message}`
+        uploadMessageType.value = 'error'
+      }
     } finally {
       bookStore.setLoading(false)
 
@@ -197,7 +210,7 @@
         if (
           bookStore.bookTitle &&
           bookStore.chapters.length > 0 &&
-          bookStore.chapters[0]?.id === bookId
+          bookStore.chapters[0]?.bookId === bookId
         ) {
           bookStore.setBookData('', [])
         }
@@ -208,8 +221,25 @@
     }
   }
 
+  const clearAllBooks = async () => {
+    if (confirm('确定要清空整个书架吗？这将无法撤销！')) {
+      try {
+        await clearBooks()
+        console.log('书架已清空')
+
+        await fetchBooks()
+
+        bookStore.setBookData('', [])
+      } catch (error) {
+        console.error('清空书架失败:', error)
+        alert('清空书架失败。')
+      }
+    }
+  }
+
   onMounted(() => {
     console.log('BookshelfView 组件已挂载，正在获取书架列表...')
+
     fetchBooks()
 
     bookStore.setBookData('', [])
