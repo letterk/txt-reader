@@ -13,6 +13,7 @@
     "format:check": "prettier --check \"**/*.{js,vue,json,md,html}\" --ignore-unknown"
   },
   "dependencies": {
+    "js-sha256": "^0.11.1",
     "pinia": "^3.0.2",
     "pinyin-pro": "^3.26.0",
     "vue": "^3.5.14",
