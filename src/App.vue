@@ -1,49 +1,7 @@
 <template>
   <div :class="theme === 'dark' ? 'dark' : 'light'" class="min-h-screen">
     <div class="mx-auto w-800px px-4">
-      <header v-if="!bookStore.bookTitle" class="py-8 text-center">
-        <h1 class="text-4xl font-bold">简单小说阅读器</h1>
-      </header>
-
-      <main class="py-4">
-        <!-- 文件选择区域和加载状态 -->
-        <input
-          ref="fileInput"
-          type="file"
-          accept=".txt"
-          style="display: none"
-          @change="handleFileChange"
-        />
-
-        <div
-          v-if="!bookStore.isLoading && !bookStore.bookTitle"
-          class="min-h-screen flex items-center justify-center"
-        >
-          <button
-            class="rounded bg-blue-500 px-6 py-3 text-lg text-white hover:bg-blue-600"
-            @click="triggerFileInput"
-          >
-            选择小说文件
-          </button>
-        </div>
-
-        <div
-          v-if="bookStore.isLoading"
-          class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-        >
-          <div class="text-xl text-white">加载中...</div>
-        </div>
-
-        <ReaderView v-if="bookStore.bookTitle" />
-      </main>
-
-      <!-- 底部导航栏，根据是否有书名显示/隐藏 -->
-      <footer v-if="bookStore.bookTitle" class="py-8 text-center">
-        <BottomNav />
-      </footer>
-
-      <!-- DirectoryDrawer 组件，仍然使用但其内部会修改 -->
-      <DirectoryDrawer />
+      <router-view />
     </div>
 
     <button
@@ -56,35 +14,16 @@
 </template>
 
 <script setup>
-  import { ref, watch, onMounted, onUnmounted } from 'vue'
+  import { ref, watch } from 'vue'
   import { useBookStore } from './stores/bookStore'
-  import ReaderView from './views/ReaderView.vue'
-  import BottomNav from './components/ReaderNav.vue'
-  import DirectoryDrawer from './components/ReaderToc.vue'
-  import { setupKeyboardListener } from './utils/keyboardHandler'
 
-  const fileInput = ref(null)
   const bookStore = useBookStore()
-  const theme = ref('dark') // 保留主题状态，用于切换背景色等
-
-  let cleanupKeyboardListener = null
-
-  const triggerFileInput = () => {
-    fileInput.value.click()
-  }
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0]
-    if (file) {
-      bookStore.loadBook(file)
-    }
-  }
+  const theme = ref('dark')
 
   const toggleTheme = () => {
     theme.value = theme.value === 'dark' ? 'light' : 'dark'
   }
 
-  // 监听书名和当前章节变化，更新页面标题
   watch(
     [() => bookStore.bookTitle, () => bookStore.currentChapter],
     ([newTitle, newChapter]) => {
@@ -99,25 +38,10 @@
     },
     { immediate: true },
   )
-
-  onMounted(() => {
-    console.log('App 组件已挂载，设置键盘监听器...')
-    cleanupKeyboardListener = setupKeyboardListener(bookStore)
-  })
-
-  onUnmounted(() => {
-    console.log('App 组件即将卸载，移除键盘监听器...')
-    if (cleanupKeyboardListener) {
-      cleanupKeyboardListener()
-    }
-  })
 </script>
 
-<style scoped>
-  /* 这里保留 scoped 样式，避免全局污染 */
-</style>
-
 <style>
+  /* 全局样式，包括主题和滚动条 */
   /* 主题样式 */
   .light {
     background-color: #ffffff; /* 白色背景 */
@@ -131,7 +55,7 @@
 
   /* ---------- 滚动条样式 ---------- */
   /* 这里的样式是全局的，但我们通过 #directory-drawer 限定只影响目录抽屉 */
-
+  /* ReaderView 的内容现在是页面整体滚动，所以不需要为它单独设置滚动条样式 */
   /* 1. Webkit 浏览器（Chrome, Safari, Edge 等）滚动条样式 */
   #directory-drawer::-webkit-scrollbar {
     width: 8px; /* 设置垂直滚动条的宽度 */
