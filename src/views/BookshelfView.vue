@@ -24,13 +24,10 @@
       </button>
 
       <!-- 文件上传过程中的加载提示 -->
-      <!-- 使用 bookshelfStore.isLoading -->
       <div v-if="bookshelfStore.isLoading" class="mt-4 text-blue-600">
-        <!-- 根据 uploadMessage 显示具体提示 -->
-        {{ bookshelfStore.uploadMessage || '正在处理文件...' }}
+        {{ bookshelfStore.uploadMessage }}
       </div>
-      <!-- 上传成功或失败的提示 -->
-      <!-- 使用 bookshelfStore 的提示状态 -->
+
       <div
         v-if="bookshelfStore.uploadMessage && !bookshelfStore.isLoading"
         class="mt-4 text-sm"
@@ -45,19 +42,14 @@
     </div>
 
     <!-- 书籍列表 -->
-    <!-- 使用 bookshelfStore.books -->
     <div v-if="bookshelfStore.books.length > 0">
       <h2 class="mb-4 text-2xl font-semibold">已保存的书籍:</h2>
       <ul class="space-y-2">
-        <!-- 遍历书架列表，显示每一本书 -->
-        <!-- 使用 bookshelfStore.books -->
         <li
           v-for="book in bookshelfStore.books"
           :key="book.id"
           class="flex items-center justify-between border border-gray-200 rounded p-4 shadow-sm dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <!-- 书名，点击后跳转到阅读页面 -->
-          <!-- 使用 book.id 作为路由参数 -->
           <router-link
             :to="{ name: 'Reader', params: { bookId: book.id } }"
             class="flex-grow text-lg font-medium dark:text-white"
@@ -85,7 +77,6 @@
         </button>
       </div>
     </div>
-    <!-- 使用 bookshelfStore.isLoading -->
     <div
       v-else-if="!bookshelfStore.isLoading"
       class="text-center text-gray-500"

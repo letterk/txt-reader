@@ -1,7 +1,6 @@
 <template>
   <div class="w-full flex flex-col py-2">
     <h2 class="mb-4 flex-shrink-0 text-center text-4xl font-bold">
-      <!-- 使用组件内部的 isLoading 状态 -->
       <span v-if="isLoading">正在加载书籍...</span>
       <span v-else-if="!bookStore.bookTitle">请选择小说文件</span>
       <span v-else>{{
@@ -9,19 +8,16 @@
       }}</span>
     </h2>
 
-    <!-- 使用组件内部的 isLoading 状态 -->
     <div
       v-if="!bookStore.bookTitle && !isLoading"
       class="text-center text-gray-500"
     >
       请在书架选择一本小说阅读。
     </div>
-    <!-- 使用组件内部的 isLoading 状态 -->
     <div
       v-else-if="bookStore.bookTitle && !isLoading"
       class="text-5 line-height-7"
     >
-      <!-- 使用 currentChapterLines getter 显示章节内容 -->
       <p
         v-for="(line, index) in bookStore.currentChapterLines"
         :key="index"
@@ -32,12 +28,8 @@
     </div>
   </div>
 
-  <!-- 只有在有书且不加载时才显示导航和目录按钮 -->
-  <!-- 使用组件内部的 isLoading 状态 -->
   <ReaderNav v-if="bookStore.bookTitle && !isLoading" />
 
-  <!-- 只有在有书且不加载时才显示目录抽屉 -->
-  <!-- 使用组件内部的 isLoading 状态 -->
   <ReaderToc v-if="bookStore.bookTitle && !isLoading" />
 </template>
 
