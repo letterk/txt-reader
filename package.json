@@ -22,6 +22,7 @@
     "@unocss/eslint-plugin": "^66.1.2",
     "@unocss/reset": "^66.1.2",
     "@vitejs/plugin-vue": "^5.2.4",
+    "dexie": "^4.0.11",
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-vue": "^10.1.0",
