@@ -29,11 +29,16 @@ export const useBookStore = defineStore('book', {
       )
     },
     chaptersListForNav: (state) => {
-      return state.chapters.map((chapter, index) => ({
-        id: chapter.id !== undefined ? chapter.id : index,
-        title: chapter.title,
-        index: index,
-      }))
+      if (state.chapters.length > 0) {
+        const bookId = state.chapters[0]?.bookId
+        return state.chapters.map((chapter, index) => ({
+          id: chapter.id !== undefined ? chapter.id : index,
+          title: chapter.title,
+          index: index,
+          bookId: bookId,
+        }))
+      }
+      return []
     },
     currentChapterLines: (state) => {
       const content = state.chapters[state.currentChapterIndex]?.content || ''
@@ -46,12 +51,17 @@ export const useBookStore = defineStore('book', {
     setBookData(title, chapters) {
       this.bookTitle = title
       this.chapters = chapters
-
       this.currentChapterIndex = 0
+      this.isDrawerVisible = false
     },
 
     goToChapter(index) {
-      if (index >= 0 && index < this.chapters.length) {
+      if (
+        index >= 0 &&
+        index < this.chapters.length &&
+        index !== this.currentChapterIndex &&
+        this.bookTitle
+      ) {
         this.currentChapterIndex = index
       }
     },
