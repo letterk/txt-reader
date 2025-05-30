@@ -5,6 +5,7 @@
       "name": "txt-reader",
       "dependencies": {
         "pinia": "^3.0.2",
+        "pinyin-pro": "^3.26.0",
         "vue": "^3.5.14",
         "vue-router": "^4.5.1",
       },
@@ -499,6 +500,8 @@
     "picomatch": ["picomatch@4.0.2", "https://registry.npmmirror.com/picomatch/-/picomatch-4.0.2.tgz", {}, "sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg=="],
 
     "pinia": ["pinia@3.0.2", "https://registry.npmmirror.com/pinia/-/pinia-3.0.2.tgz", { "dependencies": { "@vue/devtools-api": "^7.7.2" }, "peerDependencies": { "typescript": ">=4.4.4", "vue": "^2.7.0 || ^3.5.11" }, "optionalPeers": ["typescript"] }, "sha512-sH2JK3wNY809JOeiiURUR0wehJ9/gd9qFN2Y828jCbxEzKEmEt0pzCXwqiSTfuRsK9vQsOflSdnbdBOGrhtn+g=="],
+
+    "pinyin-pro": ["pinyin-pro@3.26.0", "https://registry.npmmirror.com/pinyin-pro/-/pinyin-pro-3.26.0.tgz", {}, "sha512-HcBZZb0pvm0/JkPhZHWA5Hqp2cWHXrrW/WrV+OtaYYM+kf35ffvZppIUuGmyuQ7gDr1JDJKMkbEE+GN0wfMoGg=="],
 
     "pkg-types": ["pkg-types@2.1.0", "https://registry.npmmirror.com/pkg-types/-/pkg-types-2.1.0.tgz", { "dependencies": { "confbox": "^0.2.1", "exsolve": "^1.0.1", "pathe": "^2.0.3" } }, "sha512-wmJwA+8ihJixSoHKxZJRBQG1oY8Yr9pGLzRmSsNms0iNWyHHAlZCa7mmKiFR10YPZuz/2k169JiS/inOjBCZ2A=="],
 
