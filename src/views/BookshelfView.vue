@@ -1,12 +1,8 @@
 <template>
-  <!-- 书架页面的最外层容器 -->
   <div class="w-full flex flex-col py-8">
-    <!-- 页面标题 -->
     <h1 class="mb-8 text-center text-4xl font-bold">我的书架</h1>
 
-    <!-- 文件选择区域 -->
     <div class="mb-6 text-center">
-      <!-- 隐藏的文件输入框 -->
       <input
         ref="fileInput"
         type="file"
@@ -14,7 +10,6 @@
         style="display: none"
         @change="handleFileChange"
       />
-      <!-- 触发文件选择的按钮 -->
       <button
         class="rounded bg-blue-500 px-6 py-3 text-lg text-white disabled:cursor-not-allowed hover:bg-blue-600 disabled:opacity-50"
         :disabled="bookshelfStore.isLoading"
@@ -23,7 +18,6 @@
         上传小说文件 (.txt)
       </button>
 
-      <!-- 文件上传过程中的加载提示 -->
       <div v-if="bookshelfStore.isLoading" class="mt-4 text-blue-600">
         {{ bookshelfStore.uploadMessage }}
       </div>
@@ -41,7 +35,6 @@
       </div>
     </div>
 
-    <!-- 书籍列表 -->
     <div v-if="bookshelfStore.books.length > 0">
       <h2 class="mb-4 text-2xl font-semibold">已保存的书籍:</h2>
       <ul class="space-y-2">
@@ -66,7 +59,6 @@
           </button>
         </li>
       </ul>
-      <!-- 清空书架按钮 -->
       <div class="mt-8 text-center">
         <button
           class="rounded bg-red-500 px-4 py-2 text-white disabled:cursor-not-allowed hover:bg-red-600 disabled:opacity-50"
@@ -116,12 +108,6 @@
 
     bookshelfStore.fetchBooks()
 
-    bookStore.setBookData('', [])
-
     bookStore.isDrawerVisible = false
   })
 </script>
-
-<style scoped>
-  /* 只应用于此组件的样式 */
-</style>

@@ -6,6 +6,7 @@ export const useBookStore = defineStore('book', {
     chapters: [],
     currentChapterId: null,
     isDrawerVisible: false,
+    cachedBookId: null,
   }),
   getters: {
     currentChapter: (state) => {
@@ -128,6 +129,13 @@ export const useBookStore = defineStore('book', {
 
     toggleDrawer() {
       this.isDrawerVisible = !this.isDrawerVisible
+    },
+
+    clearCache() {
+      this.bookTitle = ''
+      this.chapters = []
+      this.currentChapterId = null
+      this.cachedBookId = null
     },
   },
 })

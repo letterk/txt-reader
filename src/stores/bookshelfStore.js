@@ -123,12 +123,8 @@ export const useBookshelfStore = defineStore('bookshelf', {
           await this.fetchBooks()
           const bookStore = useBookStore()
 
-          if (
-            bookStore.bookTitle &&
-            bookStore.chapters.length > 0 &&
-            bookStore.chapters[0]?.bookId === bookId
-          ) {
-            bookStore.setBookData('', [])
+          if (bookStore.cachedBookId === bookId) {
+            bookStore.clearCache()
           }
         } catch (error) {
           console.error(`删除书籍 ID ${bookId} 失败:`, error)
@@ -154,9 +150,9 @@ export const useBookshelfStore = defineStore('bookshelf', {
           this.books = []
 
           const bookStore = useBookStore()
-          bookStore.setBookData('', [])
-
           this.setUploadMessage('书架已清空。', 'success')
+
+          bookStore.clearCache()
         } catch (error) {
           console.error('清空书架失败:', error)
           this.setUploadMessage('清空书架失败。', 'error')
