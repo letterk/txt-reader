@@ -212,7 +212,11 @@
 
     loadBook(props.bookId, props.chapterId)
 
-    cleanupKeyboardListener = setupKeyboardListener(bookStore, isLoading)
+    cleanupKeyboardListener = setupKeyboardListener(
+      bookStore,
+      isLoading,
+      router,
+    )
 
     bookStore.isDrawerVisible = false
   })

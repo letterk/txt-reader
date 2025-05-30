@@ -1,27 +1,38 @@
-export function setupKeyboardListener(bookStore, isLoadingRef) {
+export function setupKeyboardListener(bookStore, isLoadingRef, router) {
   const handleKeyDown = (event) => {
     if (isLoadingRef.value) {
       return
     }
 
-    if (bookStore.chapters.length === 0 && event.key !== 'Enter') {
+    if (
+      bookStore.chapters.length === 0 &&
+      event.key !== 'Enter' &&
+      event.key.toLowerCase() !== 'b'
+    ) {
       return
     }
 
-    switch (event.key) {
-      case 'ArrowLeft':
+    switch (event.key.toLowerCase()) {
+      case 'arrowleft':
         bookStore.goToPrevChapter()
         event.preventDefault()
         break
 
-      case 'ArrowRight':
+      case 'arrowright':
         bookStore.goToNextChapter()
         event.preventDefault()
         break
 
-      case 'Enter':
+      case 'enter':
         bookStore.toggleDrawer()
         event.preventDefault()
+        break
+
+      case 'b':
+        if (router && router.currentRoute.value.name === 'Reader') {
+          router.push({ name: 'Bookshelf' })
+          event.preventDefault()
+        }
         break
 
       default:
