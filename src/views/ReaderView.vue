@@ -60,15 +60,11 @@
   })
 
   const loadBook = async (id, targetChapterIdStr) => {
-    if (bookStore.cachedBookId === id && !targetChapterIdStr) {
-      return
-    }
-
     const targetChapterId = targetChapterIdStr
       ? parseInt(targetChapterIdStr, 10)
       : undefined
 
-    if (bookStore.cachedBookId === id && bookStore.chapters.length > 0) {
+    if (bookStore.cachedBookId === id) {
       if (
         targetChapterId !== undefined &&
         targetChapterId !== bookStore.currentChapterId
@@ -78,10 +74,14 @@
         )
         if (targetChapter) {
           bookStore.goToChapterById(targetChapterId)
+          updateRoute(id, targetChapterId)
         } else {
           console.warn(`章节 ID ${targetChapterId} 不存在，跳转到第一章`)
           bookStore.goToChapterById(bookStore.chapters[0].id)
+          updateRoute(id, bookStore.chapters[0].id)
         }
+      } else if (bookStore.currentChapterId) {
+        updateRoute(id, bookStore.currentChapterId)
       }
       return
     }
