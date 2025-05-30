@@ -4,44 +4,61 @@ export const useBookStore = defineStore('book', {
   state: () => ({
     bookTitle: '',
     chapters: [],
-    currentChapterIndex: 0,
+
+    currentChapterId: null,
     isDrawerVisible: false,
     isLoading: false,
   }),
   getters: {
     currentChapter: (state) => {
-      if (
-        state.chapters.length > 0 &&
-        state.currentChapterIndex >= 0 &&
-        state.currentChapterIndex < state.chapters.length
-      ) {
-        return state.chapters[state.currentChapterIndex]
+      if (state.chapters.length > 0 && state.currentChapterId !== null) {
+        const chapter = state.chapters.find(
+          (c) => c.id === state.currentChapterId,
+        )
+        return chapter || null
       }
       return null
     },
-    isFirstChapter: (state) => {
-      return state.chapters.length > 0 && state.currentChapterIndex === 0
+
+    currentChapterIndex: (state) => {
+      if (state.chapters.length > 0 && state.currentChapterId !== null) {
+        const index = state.chapters.findIndex(
+          (c) => c.id === state.currentChapterId,
+        )
+        return index
+      }
+      return -1
     },
+
+    isFirstChapter: (state) => {
+      const currentIndex = state.currentChapterIndex
+      return state.chapters.length > 0 && currentIndex === 0
+    },
+
     isLastChapter: (state) => {
+      const currentIndex = state.currentChapterIndex
       return (
         state.chapters.length > 0 &&
-        state.currentChapterIndex === state.chapters.length - 1
+        currentIndex !== -1 &&
+        currentIndex === state.chapters.length - 1
       )
     },
+
     chaptersListForNav: (state) => {
       if (state.chapters.length > 0) {
         const bookId = state.chapters[0]?.bookId
-        return state.chapters.map((chapter, index) => ({
-          id: chapter.id !== undefined ? chapter.id : index,
+        return state.chapters.map((chapter) => ({
+          id: chapter.id,
           title: chapter.title,
-          index: index,
+
           bookId: bookId,
         }))
       }
       return []
     },
+
     currentChapterLines: (state) => {
-      const content = state.chapters[state.currentChapterIndex]?.content || ''
+      const content = state.currentChapter?.content || ''
       return content
         ? content.split('\n').filter((line) => line.trim() !== '')
         : []
@@ -51,28 +68,55 @@ export const useBookStore = defineStore('book', {
     setBookData(title, chapters) {
       this.bookTitle = title
       this.chapters = chapters
-      this.currentChapterIndex = 0
+
+      this.currentChapterId = chapters.length > 0 ? chapters[0].id : null
       this.isDrawerVisible = false
     },
 
-    goToChapter(index) {
+    goToChapterById(chapterId) {
+      const index = this.chapters.findIndex((c) => c.id === chapterId)
+
       if (
-        index >= 0 &&
-        index < this.chapters.length &&
-        index !== this.currentChapterIndex &&
-        this.bookTitle
+        index !== -1 &&
+        this.bookTitle &&
+        this.currentChapterId !== chapterId
       ) {
-        this.currentChapterIndex = index
+        this.currentChapterId = chapterId
+      } else if (index === -1) {
+        console.warn('尝试跳转到不存在的章节 ID:', chapterId)
       }
     },
+
+    goToChapter(index) {
+      if (index >= 0 && index < this.chapters.length && this.bookTitle) {
+        const targetChapter = this.chapters[index]
+        if (targetChapter && targetChapter.id !== this.currentChapterId) {
+          this.goToChapterById(targetChapter.id)
+        }
+      } else {
+        console.warn('尝试跳转到无效的章节索引:', index)
+      }
+    },
+
     goToPrevChapter() {
-      if (!this.isFirstChapter) {
-        this.goToChapter(this.currentChapterIndex - 1)
+      const currentIndex = this.currentChapterIndex
+
+      if (currentIndex > 0) {
+        const prevChapterId = this.chapters[currentIndex - 1]?.id
+        if (prevChapterId) {
+          this.goToChapterById(prevChapterId)
+        }
       }
     },
+
     goToNextChapter() {
-      if (!this.isLastChapter) {
-        this.goToChapter(this.currentChapterIndex + 1)
+      const currentIndex = this.currentChapterIndex
+
+      if (currentIndex !== -1 && currentIndex < this.chapters.length - 1) {
+        const nextChapterId = this.chapters[currentIndex + 1]?.id
+        if (nextChapterId) {
+          this.goToChapterById(nextChapterId)
+        }
       }
     },
 

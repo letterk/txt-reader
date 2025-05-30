@@ -4,6 +4,7 @@
       <router-view />
     </div>
 
+    <!-- 主题切换按钮 -->
     <button
       class="fixed left-4 top-4 rounded bg-gray-200 px-3 py-1 text-xs dark:bg-gray-700 dark:text-white focus:outline-none"
       @click="toggleTheme"
@@ -15,9 +16,11 @@
 
 <script setup>
   import { ref, watch } from 'vue'
+
   import { useBookStore } from './stores/bookStore'
 
   const bookStore = useBookStore()
+
   const theme = ref('dark')
 
   const toggleTheme = () => {
@@ -30,6 +33,7 @@
       let pageTitle = '简单小说阅读器'
       if (newTitle) {
         pageTitle = newTitle
+
         if (newChapter && newChapter.title) {
           pageTitle += ` - ${newChapter.title}`
         }

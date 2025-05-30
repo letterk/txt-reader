@@ -1,6 +1,4 @@
-<!-- src/components/DirectoryDrawer.vue -->
 <template>
-  <!-- 根据 bookStore.isDrawerVisible 控制显示/隐藏，并添加过渡效果 -->
   <div
     id="directory-drawer"
     :class="{
@@ -19,18 +17,19 @@
     <!-- 目录列表容器，使用 flex-grow 使其占据剩余空间并允许滚动 -->
     <ul class="flex flex-col">
       <!-- 遍历 chaptersListForNav 渲染章节列表 -->
+      <!-- 使用 item.id 作为 key -->
       <li
         v-for="item in bookStore.chaptersListForNav"
-        :id="`chapter-item-${item.index}`"
-        :key="item.index"
+        :id="`chapter-item-${item.id}`"
+        :key="item.id"
         :class="{
           'bg-blue-100 dark:bg-blue-900':
-            item.index === bookStore.currentChapterIndex,
+            item.id === bookStore.currentChapterId,
           'hover:bg-gray-100 dark:hover:bg-gray-700':
-            item.index !== bookStore.currentChapterIndex,
+            item.id !== bookStore.currentChapterId,
         }"
-        class="px-4 py-2 text-gray-800 dark:text-gray-200"
-        @click="handleChapterClick(item.index)"
+        class="cursor-pointer px-4 py-2 text-gray-800 dark:text-gray-200"
+        @click="handleChapterClick(item.id)"
       >
         {{ item.title }}
       </li>
@@ -51,44 +50,43 @@
 
   const bookStore = useBookStore()
 
-  // 章节点击事件处理
-  const handleChapterClick = (index) => {
-    bookStore.goToChapter(index)
-    bookStore.toggleDrawer() // 关闭抽屉
+  const handleChapterClick = (chapterId) => {
+    bookStore.goToChapterById(chapterId)
+    bookStore.toggleDrawer()
 
     nextTick(() => {
-      scrollToCurrentChapter() // 滚动到当前章节
+      scrollToCurrentChapter()
     })
   }
 
   const scrollToCurrentChapter = () => {
     if (
-      bookStore.currentChapterIndex >= 0 &&
+      bookStore.currentChapterId !== null &&
       bookStore.chaptersListForNav.length > 0
     ) {
       nextTick(() => {
-        const itemId = `chapter-item-${bookStore.currentChapterIndex}`
+        const itemId = `chapter-item-${bookStore.currentChapterId}`
         const element = document.getElementById(itemId)
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' })
         } else {
-          console.warn(`未找到章节元素: ${itemId}`)
+          console.warn(
+            `未找到章节元素: ${itemId} 对应 ID ${bookStore.currentChapterId}`,
+          )
         }
       })
     }
   }
 
-  // 监听章节索引变化，当抽屉打开时滚动到当前章节
   watch(
-    () => bookStore.currentChapterIndex,
-    (newIndex, oldIndex) => {
-      if (newIndex !== oldIndex && bookStore.isDrawerVisible) {
+    () => bookStore.currentChapterId,
+    (newId, oldId) => {
+      if (newId !== oldId && bookStore.isDrawerVisible) {
         scrollToCurrentChapter()
       }
     },
   )
 
-  // 监听抽屉是否打开，如果打开则滚动到当前章节
   watch(
     () => bookStore.isDrawerVisible,
     (isVisible) => {
