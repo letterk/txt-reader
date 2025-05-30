@@ -3,13 +3,29 @@ import Dexie from 'dexie'
 const db = new Dexie('NovelReaderDB')
 
 db.version(1).stores({
-  books: '++id, bookTitle',
+  books: 'id, bookTitle',
 })
+
+import { slugify } from './slugify'
 
 export async function addBook(bookData) {
   try {
-    const id = await db.books.add(bookData)
-    return id
+    const baseId = slugify(bookData.bookTitle)
+    let finalId = baseId
+    let counter = 1
+
+    let existingBook = await db.books.get(finalId)
+    while (existingBook) {
+      counter++
+      finalId = `${baseId}-${counter}`
+      existingBook = await db.books.get(finalId)
+    }
+
+    const bookDataWithId = { ...bookData, id: finalId }
+
+    await db.books.add(bookDataWithId)
+
+    return finalId
   } catch (error) {
     console.error('添加书籍失败:', error)
     throw error
