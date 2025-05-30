@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 import {
-  getAllBooks,
+  getAllBookTitles,
   addBook as dbAddBook,
   deleteBookById,
   clearBooks,
@@ -14,11 +14,9 @@ import { useBookStore } from './bookStore'
 export const useBookshelfStore = defineStore('bookshelf', {
   state: () => ({
     books: [],
-
     isLoading: false,
-
+    isBooksCached: false,
     uploadMessage: '',
-
     uploadMessageType: '',
   }),
 
@@ -38,10 +36,12 @@ export const useBookshelfStore = defineStore('bookshelf', {
     },
 
     async fetchBooks() {
+      if (this.isBooksCached) return
       this.setLoading(true)
       try {
-        const allBooks = await getAllBooks()
-        this.books = allBooks
+        const allBookTitles = await getAllBookTitles()
+        this.books = allBookTitles
+        this.isBooksCached = true
       } catch (error) {
         console.error('获取书架列表失败:', error)
         this.setUploadMessage('获取书架列表失败。', 'error')
@@ -92,6 +92,7 @@ export const useBookshelfStore = defineStore('bookshelf', {
         console.log(`书籍《${bookTitle}》保存成功，ID: ${bookId}`)
         this.setUploadMessage(`书籍《${bookTitle}》上传并保存成功！`, 'success')
 
+        this.isBooksCached = false
         await this.fetchBooks()
       } catch (error) {
         console.error('处理文件失败:', error)
@@ -118,8 +119,8 @@ export const useBookshelfStore = defineStore('bookshelf', {
           await deleteBookById(bookId)
           console.log(`书籍 ID ${bookId} 删除成功`)
 
+          this.isBooksCached = false
           await this.fetchBooks()
-
           const bookStore = useBookStore()
 
           if (

@@ -56,12 +56,16 @@ export async function addBook(bookData, fileContent) {
   }
 }
 
-export async function getAllBooks() {
+export async function getAllBookTitles() {
   try {
     const books = await db.books.toArray()
-    return books
+    return books.map((book) => ({
+      id: book.id,
+      bookTitle: book.bookTitle,
+      uploadTime: book.uploadTime,
+    }))
   } catch (error) {
-    console.error('获取书籍列表失败:', error)
+    console.error('获取书籍标题列表失败:', error)
     throw error
   }
 }
