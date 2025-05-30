@@ -10,7 +10,7 @@ const routes = [
     component: BookshelfView,
   },
   {
-    path: '/read/:bookId/:chapterId?',
+    path: '/:bookId/:chapterId?',
     name: 'Reader',
     component: ReaderView,
     props: true,
