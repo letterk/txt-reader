@@ -1,32 +1,56 @@
 import Dexie from 'dexie'
+import { sha256 } from 'js-sha256'
+
+import { slugify } from './slugify'
 
 const db = new Dexie('NovelReaderDB')
 
 db.version(1).stores({
-  books: 'id, bookTitle',
+  books: 'id, bookTitle, &contentHash',
 })
 
-import { slugify } from './slugify'
-
-export async function addBook(bookData) {
+export async function addBook(bookData, fileContent) {
   try {
+    const contentHash = sha256(fileContent)
+
+    const existingBookWithHash = await db.books
+      .where('contentHash')
+      .equals(contentHash)
+      .first()
+
+    if (existingBookWithHash) {
+      const error = new Error(
+        `书架中已存在内容相同的书籍：《${existingBookWithHash.bookTitle}》。`,
+      )
+      error.isDuplicate = true
+      throw error
+    }
+
     const baseId = slugify(bookData.bookTitle)
     let finalId = baseId
     let counter = 1
 
-    let existingBook = await db.books.get(finalId)
-    while (existingBook) {
+    let existingBookWithId = await db.books.get(finalId)
+    while (existingBookWithId) {
       counter++
       finalId = `${baseId}-${counter}`
-      existingBook = await db.books.get(finalId)
+      existingBookWithId = await db.books.get(finalId)
     }
 
-    const bookDataWithId = { ...bookData, id: finalId }
+    const bookDataToSave = {
+      ...bookData,
+      id: finalId,
+      contentHash: contentHash,
+    }
 
-    await db.books.add(bookDataWithId)
+    await db.books.add(bookDataToSave)
 
     return finalId
   } catch (error) {
+    if (error.isDuplicate) {
+      throw error
+    }
+
     console.error('添加书籍失败:', error)
     throw error
   }
@@ -64,7 +88,6 @@ export async function deleteBookById(id) {
 export async function clearBooks() {
   try {
     await db.books.clear()
-    console.log('已清空 books 仓库')
   } catch (error) {
     console.error('清空 books 仓库失败:', error)
     throw error
