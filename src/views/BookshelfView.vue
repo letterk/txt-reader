@@ -49,7 +49,6 @@
           >
             {{ book.bookTitle }}
           </router-link>
-          <!-- 删除按钮 -->
           <button
             class="ml-4 text-red-500 disabled:cursor-not-allowed hover:text-red-700 disabled:opacity-50"
             :disabled="bookshelfStore.isLoading"
@@ -79,35 +78,14 @@
 </template>
 
 <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref } from 'vue'
 
-  import { useBookshelfStore } from '../stores/bookshelfStore'
+  import { useBookshelfLogic } from '../composables/useBookshelfLogic'
 
-  import { useBookStore } from '../stores/bookStore'
-
-  const bookshelfStore = useBookshelfStore()
-  const bookStore = useBookStore()
+  const { bookshelfStore, handleFileChange } = useBookshelfLogic()
 
   const fileInput = ref(null)
-
   const triggerFileInput = () => {
     fileInput.value.click()
   }
-
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0]
-    if (!file) return
-
-    event.target.value = ''
-
-    await bookshelfStore.addBook(file)
-  }
-
-  onMounted(() => {
-    console.log('BookshelfView 组件已挂载，正在获取书架列表...')
-
-    bookshelfStore.fetchBooks()
-
-    bookStore.isDrawerVisible = false
-  })
 </script>
