@@ -1,5 +1,4 @@
 <template>
-  <!-- 使用 UnoCSS flex 布局 -->
   <div class="mt-4 flex justify-center space-x-4">
     <button
       class="rounded bg-gray-400 px-4 py-2 text-white hover:bg-gray-500"

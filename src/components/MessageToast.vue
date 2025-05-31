@@ -47,7 +47,6 @@
     text,
     { type = 'info', duration = 3000, closable = true, onClick = null } = {},
   ) => {
-    // 验证类型
     if (!messageTypes.includes(type)) {
       type = 'info'
     }
@@ -92,7 +91,6 @@
     }
   }
 
-  // 暴露给父组件调用的方法
   defineExpose({
     showMessage,
     dismissMessage,

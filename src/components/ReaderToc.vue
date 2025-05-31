@@ -7,17 +7,13 @@
     }"
     class="fixed inset-y-0 left-0 z-1 w-300px overflow-y-auto bg-white shadow-lg transition-transform duration-300 ease-in-out dark:bg-gray-800"
   >
-    <!-- 抽屉头部，显示书名 -->
     <div class="border-b border-gray-200 p-4 dark:border-gray-700">
       <h2 class="text-lg font-bold dark:text-white">
         {{ bookStore.bookTitle || '目录' }}
       </h2>
     </div>
 
-    <!-- 目录列表容器，使用 flex-grow 使其占据剩余空间并允许滚动 -->
     <ul class="flex flex-col">
-      <!-- 遍历 chaptersListForNav 渲染章节列表 -->
-      <!-- 使用 item.id 作为 key -->
       <li
         v-for="item in bookStore.chaptersListForNav"
         :id="`chapter-item-${item.id}`"
@@ -36,7 +32,6 @@
     </ul>
   </div>
 
-  <!-- 抽屉外部的半透明遮罩层 -->
   <div
     v-if="bookStore.isDrawerVisible"
     class="fixed inset-0 bg-black bg-opacity-50"
