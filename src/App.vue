@@ -22,12 +22,12 @@
 
 <style scoped>
   .light {
-    background-color: #ffffff;
-    color: #000000;
+    background-color: #fffbea;
+    color: #323232;
   }
 
   .dark {
-    background-color: #1e1e1e;
-    color: #e0e0e0;
+    background-color: #2d2d2d;
+    color: #939393;
   }
 </style>
