@@ -1,29 +1,18 @@
 <template>
-  <div class="w-full flex flex-col py-2">
-    <h2 class="mb-4 flex-shrink-0 text-center text-4xl font-bold">
-      <span v-if="isLoading">正在加载书籍...</span>
-      <span v-else-if="!bookStore.bookTitle">请选择小说文件</span>
-      <span v-else>{{
-        bookStore.currentChapter?.title || '章节加载中...'
-      }}</span>
-    </h2>
-
+  <div class="w-full flex flex-col">
     <div
-      v-if="!bookStore.bookTitle && !isLoading"
-      class="text-center text-gray-500"
-    >
-      请在书架选择一本小说阅读。
-    </div>
-    <div
-      v-else-if="bookStore.bookTitle && !isLoading"
-      class="text-5 line-height-7"
+      v-if="bookStore.bookTitle && !isLoading"
+      class="text-20px line-height-1.5em"
     >
       <p
         v-for="(line, index) in bookStore.currentChapterLines"
         :key="index"
-        class="my-2 indent-lg"
+        :class="{
+          'text-center text-1.5em font-bold mb-8 mt-4': line.isTitle,
+          'indent-2em mb-0.2em': !line.isTitle,
+        }"
       >
-        {{ line }}
+        {{ line.text }}
       </p>
     </div>
   </div>
@@ -46,6 +35,7 @@
       type: String,
       required: true,
     },
+
     chapterId: {
       type: String,
       required: false,

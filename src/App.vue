@@ -1,6 +1,6 @@
 <template>
   <div :class="theme === 'dark' ? 'dark' : 'light'" class="min-h-screen">
-    <div class="mx-auto w-800px px-4">
+    <div class="mx-auto w-800px">
       <router-view />
     </div>
 

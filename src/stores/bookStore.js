@@ -45,22 +45,29 @@ export const useBookStore = defineStore('book', {
 
     chaptersListForNav: (state) => {
       if (state.chapters.length > 0) {
-        const bookId = state.chapters[0]?.bookId
         return state.chapters.map((chapter) => ({
           id: chapter.id,
           title: chapter.title,
-          bookId: bookId,
         }))
       }
       return []
     },
 
     currentChapterLines: (state) => {
-      const content = state.currentChapter?.content || ''
+      const chapter = state.currentChapter
+      if (!chapter) return []
 
-      return content
-        ? content.split('\n').filter((line) => line.trim() !== '')
+      const lines = chapter.content
+        ? chapter.content.split('\n').filter((line) => line.trim() !== '')
         : []
+
+      const formattedLines = [{ text: chapter.title, isTitle: true }]
+
+      lines.forEach((line) => {
+        formattedLines.push({ text: line, isTitle: false })
+      })
+
+      return formattedLines
     },
   },
   actions: {
@@ -90,7 +97,6 @@ export const useBookStore = defineStore('book', {
     goToChapter(index) {
       if (index >= 0 && index < this.chapters.length && this.bookTitle) {
         const targetChapter = this.chapters[index]
-
         if (targetChapter && targetChapter.id !== this.currentChapterId) {
           this.goToChapterById(targetChapter.id)
         }
@@ -101,10 +107,8 @@ export const useBookStore = defineStore('book', {
 
     goToPrevChapter() {
       const currentIndex = this.currentChapterIndex
-
       if (currentIndex > 0) {
         const prevChapterId = this.chapters[currentIndex - 1]?.id
-
         if (prevChapterId) {
           this.goToChapterById(prevChapterId)
         }
@@ -115,10 +119,8 @@ export const useBookStore = defineStore('book', {
 
     goToNextChapter() {
       const currentIndex = this.currentChapterIndex
-
       if (currentIndex !== -1 && currentIndex < this.chapters.length - 1) {
         const nextChapterId = this.chapters[currentIndex + 1]?.id
-
         if (nextChapterId) {
           this.goToChapterById(nextChapterId)
         }
