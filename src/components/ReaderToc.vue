@@ -96,3 +96,17 @@
     },
   )
 </script>
+
+<style scoped>
+  #directory-drawer {
+    scrollbar-width: thin;
+  }
+
+  .light #directory-drawer {
+    scrollbar-color: #c2c2c2 #f0f0f0;
+  }
+
+  .dark #directory-drawer {
+    scrollbar-color: #555 #333;
+  }
+</style>
