@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useBookStore } from '../stores/bookStore'
 
 export function useGlobalEffects() {
@@ -9,6 +9,8 @@ export function useGlobalEffects() {
   const toggleTheme = () => {
     theme.value = theme.value === 'dark' ? 'light' : 'dark'
   }
+
+  const isDrawerVisible = computed(() => bookStore.isDrawerVisible)
 
   watch(
     [() => bookStore.bookTitle, () => bookStore.currentChapter],
@@ -29,5 +31,6 @@ export function useGlobalEffects() {
   return {
     theme,
     toggleTheme,
+    isDrawerVisible,
   }
 }

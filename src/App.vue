@@ -5,10 +5,11 @@
     </div>
 
     <button
-      class="fixed left-4 top-4 rounded bg-gray-200 px-3 py-1 text-xs dark:bg-gray-700 dark:text-white focus:outline-none"
+      v-if="!isDrawerVisible"
+      class="fixed left-4 top-4 h-10 w-10 rounded-full text-xl hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-700"
       @click="toggleTheme"
     >
-      切换主题
+      🎨
     </button>
   </div>
 </template>
@@ -16,7 +17,7 @@
 <script setup>
   import { useGlobalEffects } from './composables/useGlobalEffects'
 
-  const { theme, toggleTheme } = useGlobalEffects()
+  const { theme, toggleTheme, isDrawerVisible } = useGlobalEffects()
 </script>
 
 <style scoped>
