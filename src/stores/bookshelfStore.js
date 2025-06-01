@@ -13,14 +13,12 @@ import { parseBookText } from '../utils/parser'
 import { useBookStore } from './bookStore'
 
 export const useBookshelfStore = defineStore('bookshelf', () => {
-  // state
   const books = ref([])
   const isLoading = ref(false)
   const isBooksCached = ref(false)
   const uploadMessage = ref('')
   const uploadMessageType = ref('')
 
-  // actions
   function setLoading(loading) {
     isLoading.value = loading
   }
@@ -121,8 +119,11 @@ export const useBookshelfStore = defineStore('bookshelf', () => {
         await fetchBooks()
         const bookStore = useBookStore()
 
-        if (bookStore.cachedBookId === bookId) {
-          bookStore.clearCache()
+        if (
+          bookStore.bookTitle &&
+          bookStore.chapters.some((c) => c.bookId === bookId)
+        ) {
+          bookStore.clearBookData()
         }
       } catch (error) {
         console.error(`删除书籍 ID ${bookId} 失败:`, error)
@@ -145,11 +146,12 @@ export const useBookshelfStore = defineStore('bookshelf', () => {
         await clearBooks()
 
         books.value = []
+        isBooksCached.value = false
 
         const bookStore = useBookStore()
         setUploadMessage('书架已清空。', 'success')
 
-        bookStore.clearCache()
+        bookStore.clearBookData()
       } catch (error) {
         console.error('清空书架失败:', error)
         setUploadMessage('清空书架失败。', 'error')
@@ -163,14 +165,11 @@ export const useBookshelfStore = defineStore('bookshelf', () => {
   }
 
   return {
-    // state
     books,
     isLoading,
-    isBooksCached,
     uploadMessage,
     uploadMessageType,
 
-    // actions
     setLoading,
     setUploadMessage,
     clearUploadMessage,

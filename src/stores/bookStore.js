@@ -2,16 +2,13 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useBookStore = defineStore('book', () => {
-  // state
   const bookTitle = ref('')
   const chapters = ref([])
   const currentChapterId = ref(null)
   const isDrawerVisible = ref(false)
-  const cachedBookId = ref(null)
   const displayedChaptersContent = ref([])
   const navigationSource = ref('scroll')
 
-  // getters
   const currentChapter = computed(() => {
     if (chapters.value.length > 0 && currentChapterId.value !== null) {
       const chapter = chapters.value.find(
@@ -68,11 +65,9 @@ export const useBookStore = defineStore('book', () => {
     return lastDisplayedChapter.id !== lastOverallChapter.id
   })
 
-  // actions
-  function setBookData(title, chaptersFromDB, bookId) {
+  function setBookData(title, chaptersFromDB) {
     bookTitle.value = title
-    chapters.value = chaptersFromDB.map((ch) => ({ ...ch, bookId }))
-    cachedBookId.value = bookId
+    chapters.value = chaptersFromDB
     displayedChaptersContent.value = []
   }
 
@@ -93,7 +88,6 @@ export const useBookStore = defineStore('book', () => {
       id: chapterData.id,
       title: chapterData.title,
       lines: formattedLines,
-      bookId: chapterData.bookId || cachedBookId.value,
     }
   }
 
@@ -183,26 +177,22 @@ export const useBookStore = defineStore('book', () => {
     isDrawerVisible.value = !isDrawerVisible.value
   }
 
-  function clearCache() {
+  function clearBookData() {
     bookTitle.value = ''
     chapters.value = []
     currentChapterId.value = null
-    cachedBookId.value = null
     displayedChaptersContent.value = []
     navigationSource.value = 'scroll'
   }
 
   return {
-    // state
     bookTitle,
     chapters,
     currentChapterId,
     isDrawerVisible,
-    cachedBookId,
     displayedChaptersContent,
     navigationSource,
 
-    // getters
     currentChapter,
     currentChapterIndex,
     isFirstChapter,
@@ -210,7 +200,6 @@ export const useBookStore = defineStore('book', () => {
     chaptersListForNav,
     canLoadMoreChaptersForward,
 
-    // actions
     setBookData,
     loadChapterIntoDisplay,
     setCurrentChapterId,
@@ -219,6 +208,6 @@ export const useBookStore = defineStore('book', () => {
     goToNextChapter,
     setNavigationSource,
     toggleDrawer,
-    clearCache,
+    clearBookData,
   }
 })
