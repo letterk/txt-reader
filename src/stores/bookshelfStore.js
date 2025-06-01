@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
 import {
   getAllBookTitles,
@@ -11,155 +12,171 @@ import { parseBookText } from '../utils/parser'
 
 import { useBookStore } from './bookStore'
 
-export const useBookshelfStore = defineStore('bookshelf', {
-  state: () => ({
-    books: [],
-    isLoading: false,
-    isBooksCached: false,
-    uploadMessage: '',
-    uploadMessageType: '',
-  }),
+export const useBookshelfStore = defineStore('bookshelf', () => {
+  // state
+  const books = ref([])
+  const isLoading = ref(false)
+  const isBooksCached = ref(false)
+  const uploadMessage = ref('')
+  const uploadMessageType = ref('')
 
-  actions: {
-    setLoading(isLoading) {
-      this.isLoading = isLoading
-    },
+  // actions
+  function setLoading(loading) {
+    isLoading.value = loading
+  }
 
-    setUploadMessage(message, type = '') {
-      this.uploadMessage = message
-      this.uploadMessageType = type
-    },
+  function setUploadMessage(message, type = '') {
+    uploadMessage.value = message
+    uploadMessageType.value = type
+  }
 
-    clearUploadMessage() {
-      this.uploadMessage = ''
-      this.uploadMessageType = ''
-    },
+  function clearUploadMessage() {
+    uploadMessage.value = ''
+    uploadMessageType.value = ''
+  }
 
-    async fetchBooks() {
-      if (this.isBooksCached) return
-      this.setLoading(true)
+  async function fetchBooks() {
+    if (isBooksCached.value) return
+    setLoading(true)
+    try {
+      const allBookTitles = await getAllBookTitles()
+      books.value = allBookTitles
+      isBooksCached.value = true
+    } catch (error) {
+      console.error('获取书架列表失败:', error)
+      setUploadMessage('获取书架列表失败。', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function addBook(file) {
+    if (isLoading.value) return
+
+    setLoading(true)
+    setUploadMessage('正在读取文件...')
+
+    try {
+      if (!file.name.endsWith('.txt')) {
+        setUploadMessage('请选择 .txt 格式的小说文件。', 'error')
+        return
+      }
+
+      const reader = new FileReader()
+      const fileContent = await new Promise((resolve, reject) => {
+        reader.onload = (event) => resolve(event.target.result)
+        reader.onerror = (error) => reject(error)
+        reader.readAsText(file, 'UTF-8')
+      })
+
+      setUploadMessage('文件读取成功，正在解析...')
+
+      const chapters = parseBookText(fileContent)
+      const bookTitle =
+        (file.name.match(/《(.*?)》/) ?? [])[1] ??
+        file.name.replace(/\.txt$/, '')
+
+      if (chapters.length === 0) {
+        setUploadMessage('未解析到任何章节，请检查文件格式。', 'error')
+        return
+      }
+
+      const bookData = {
+        bookTitle: bookTitle,
+        chapters: chapters,
+        uploadTime: new Date().toISOString(),
+      }
+
+      await dbAddBook(bookData, fileContent)
+
+      setUploadMessage(`书籍《${bookTitle}》上传并保存成功！`, 'success')
+
+      isBooksCached.value = false
+      await fetchBooks()
+    } catch (error) {
+      console.error('处理文件失败:', error)
+      if (error.isDuplicate) {
+        setUploadMessage(error.message, 'error')
+      } else {
+        setUploadMessage(`文件处理失败: ${error.message}`, 'error')
+      }
+    } finally {
+      setLoading(false)
+
+      setTimeout(() => {
+        clearUploadMessage()
+      }, 5000)
+    }
+  }
+
+  async function deleteBook(bookId) {
+    if (isLoading.value) return
+
+    if (confirm('确定要删除这本书籍吗？')) {
+      setLoading(true)
       try {
-        const allBookTitles = await getAllBookTitles()
-        this.books = allBookTitles
-        this.isBooksCached = true
-      } catch (error) {
-        console.error('获取书架列表失败:', error)
-        this.setUploadMessage('获取书架列表失败。', 'error')
-      } finally {
-        this.setLoading(false)
-      }
-    },
+        await deleteBookById(bookId)
 
-    async addBook(file) {
-      if (this.isLoading) return
+        isBooksCached.value = false
+        await fetchBooks()
+        const bookStore = useBookStore()
 
-      this.setLoading(true)
-      this.setUploadMessage('正在读取文件...')
-
-      try {
-        if (!file.name.endsWith('.txt')) {
-          this.setUploadMessage('请选择 .txt 格式的小说文件。', 'error')
-          return
-        }
-
-        const reader = new FileReader()
-        const fileContent = await new Promise((resolve, reject) => {
-          reader.onload = (event) => resolve(event.target.result)
-          reader.onerror = (error) => reject(error)
-          reader.readAsText(file, 'UTF-8')
-        })
-
-        this.setUploadMessage('文件读取成功，正在解析...')
-
-        const chapters = parseBookText(fileContent)
-        const bookTitle =
-          (file.name.match(/《(.*?)》/) ?? [])[1] ??
-          file.name.replace(/\.txt$/, '')
-
-        if (chapters.length === 0) {
-          this.setUploadMessage('未解析到任何章节，请检查文件格式。', 'error')
-          return
-        }
-
-        const bookData = {
-          bookTitle: bookTitle,
-          chapters: chapters,
-          uploadTime: new Date().toISOString(),
-        }
-
-        await dbAddBook(bookData, fileContent)
-
-        this.setUploadMessage(`书籍《${bookTitle}》上传并保存成功！`, 'success')
-
-        this.isBooksCached = false
-        await this.fetchBooks()
-      } catch (error) {
-        console.error('处理文件失败:', error)
-        if (error.isDuplicate) {
-          this.setUploadMessage(error.message, 'error')
-        } else {
-          this.setUploadMessage(`文件处理失败: ${error.message}`, 'error')
-        }
-      } finally {
-        this.setLoading(false)
-
-        setTimeout(() => {
-          this.clearUploadMessage()
-        }, 5000)
-      }
-    },
-
-    async deleteBook(bookId) {
-      if (this.isLoading) return
-
-      if (confirm('确定要删除这本书籍吗？')) {
-        this.setLoading(true)
-        try {
-          await deleteBookById(bookId)
-
-          this.isBooksCached = false
-          await this.fetchBooks()
-          const bookStore = useBookStore()
-
-          if (bookStore.cachedBookId === bookId) {
-            bookStore.clearCache()
-          }
-        } catch (error) {
-          console.error(`删除书籍 ID ${bookId} 失败:`, error)
-          this.setUploadMessage('删除书籍失败。', 'error')
-        } finally {
-          this.setLoading(false)
-          setTimeout(() => {
-            this.clearUploadMessage()
-          }, 3000)
-        }
-      }
-    },
-
-    async clearAllBooks() {
-      if (this.isLoading) return
-
-      if (confirm('确定要清空整个书架吗？这将无法撤销！')) {
-        this.setLoading(true)
-        try {
-          await clearBooks()
-
-          this.books = []
-
-          const bookStore = useBookStore()
-          this.setUploadMessage('书架已清空。', 'success')
-
+        if (bookStore.cachedBookId === bookId) {
           bookStore.clearCache()
-        } catch (error) {
-          console.error('清空书架失败:', error)
-          this.setUploadMessage('清空书架失败。', 'error')
-        } finally {
-          this.setLoading(false)
-          setTimeout(() => {
-            this.clearUploadMessage()
-          }, 3000)
         }
+      } catch (error) {
+        console.error(`删除书籍 ID ${bookId} 失败:`, error)
+        setUploadMessage('删除书籍失败。', 'error')
+      } finally {
+        setLoading(false)
+        setTimeout(() => {
+          clearUploadMessage()
+        }, 3000)
       }
-    },
-  },
+    }
+  }
+
+  async function clearAllBooks() {
+    if (isLoading.value) return
+
+    if (confirm('确定要清空整个书架吗？这将无法撤销！')) {
+      setLoading(true)
+      try {
+        await clearBooks()
+
+        books.value = []
+
+        const bookStore = useBookStore()
+        setUploadMessage('书架已清空。', 'success')
+
+        bookStore.clearCache()
+      } catch (error) {
+        console.error('清空书架失败:', error)
+        setUploadMessage('清空书架失败。', 'error')
+      } finally {
+        setLoading(false)
+        setTimeout(() => {
+          clearUploadMessage()
+        }, 3000)
+      }
+    }
+  }
+
+  return {
+    // state
+    books,
+    isLoading,
+    isBooksCached,
+    uploadMessage,
+    uploadMessageType,
+
+    // actions
+    setLoading,
+    setUploadMessage,
+    clearUploadMessage,
+    fetchBooks,
+    addBook,
+    deleteBook,
+    clearAllBooks,
+  }
 })

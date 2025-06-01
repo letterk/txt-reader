@@ -1,189 +1,220 @@
 import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
 
-export const useBookStore = defineStore('book', {
-  state: () => ({
-    bookTitle: '',
-    chapters: [],
-    currentChapterId: null,
-    isDrawerVisible: false,
-    cachedBookId: null,
-    displayedChaptersContent: [],
-    navigationSource: 'scroll',
-  }),
-  getters: {
-    currentChapter: (state) => {
-      if (state.chapters.length > 0 && state.currentChapterId !== null) {
-        const chapter = state.chapters.find(
-          (c) => c.id === state.currentChapterId,
-        )
-        return chapter || null
-      }
-      return null
-    },
-    currentChapterIndex: (state) => {
-      if (state.chapters.length > 0 && state.currentChapterId !== null) {
-        const index = state.chapters.findIndex(
-          (c) => c.id === state.currentChapterId,
-        )
-        return index
-      }
-      return -1
-    },
-    isFirstChapter: (state) => {
-      const currentIndex = state.currentChapterIndex
-      return state.chapters.length > 0 && currentIndex === 0
-    },
-    isLastChapter: (state) => {
-      const currentIndex = state.currentChapterIndex
-      return (
-        state.chapters.length > 0 &&
-        currentIndex !== -1 &&
-        currentIndex === state.chapters.length - 1
+export const useBookStore = defineStore('book', () => {
+  // state
+  const bookTitle = ref('')
+  const chapters = ref([])
+  const currentChapterId = ref(null)
+  const isDrawerVisible = ref(false)
+  const cachedBookId = ref(null)
+  const displayedChaptersContent = ref([])
+  const navigationSource = ref('scroll')
+
+  // getters
+  const currentChapter = computed(() => {
+    if (chapters.value.length > 0 && currentChapterId.value !== null) {
+      const chapter = chapters.value.find(
+        (c) => c.id === currentChapterId.value,
       )
-    },
-    chaptersListForNav: (state) => {
-      if (state.chapters.length > 0) {
-        return state.chapters.map((chapter) => ({
-          id: chapter.id,
-          title: chapter.title,
-        }))
-      }
-      return []
-    },
-    canLoadMoreChaptersForward: (state) => {
-      if (
-        state.displayedChaptersContent.length === 0 ||
-        state.chapters.length === 0
-      ) {
-        return false
-      }
-      const lastDisplayedChapter = state.displayedChaptersContent.slice(-1)[0]
-      if (!lastDisplayedChapter) return false
-      const lastOverallChapter = state.chapters.slice(-1)[0]
-      if (!lastOverallChapter) return false
-      return lastDisplayedChapter.id !== lastOverallChapter.id
-    },
-  },
-  actions: {
-    setBookData(title, chaptersFromDB, bookId) {
-      this.bookTitle = title
-      this.chapters = chaptersFromDB.map((ch) => ({ ...ch, bookId }))
-      this.cachedBookId = bookId
-      this.displayedChaptersContent = []
-    },
+      return chapter || null
+    }
+    return null
+  })
 
-    _formatChapterForDisplay(chapterData) {
-      if (!chapterData || !chapterData.content) return null
-      const lines = chapterData.content
-        .split('\n')
-        .filter((line) => line.trim() !== '')
-      const formattedLines = []
-      lines.forEach((line) => {
-        formattedLines.push({ text: line, isTitle: false })
-      })
-      return {
-        id: chapterData.id,
-        title: chapterData.title,
-        lines: formattedLines,
-        bookId: chapterData.bookId || this.cachedBookId,
-      }
-    },
+  const currentChapterIndex = computed(() => {
+    if (chapters.value.length > 0 && currentChapterId.value !== null) {
+      const index = chapters.value.findIndex(
+        (c) => c.id === currentChapterId.value,
+      )
+      return index
+    }
+    return -1
+  })
 
-    loadChapterIntoDisplay(chapterId, mode = 'replace') {
-      const chapterData = this.chapters.find((c) => c.id === chapterId)
-      if (!chapterData) {
-        console.warn(`Chapter ${chapterId} not found in full chapter list.`)
-        return
-      }
-      const formattedChapter = this._formatChapterForDisplay(chapterData)
-      if (!formattedChapter) {
-        console.warn(`Failed to format chapter ${chapterId} for display.`)
-        return
-      }
+  const isFirstChapter = computed(() => {
+    return chapters.value.length > 0 && currentChapterIndex.value === 0
+  })
 
-      if (mode === 'replace') {
-        this.displayedChaptersContent = [formattedChapter]
-      } else if (mode === 'append') {
-        if (!this.displayedChaptersContent.some((c) => c.id === chapterId)) {
-          this.displayedChaptersContent.push(formattedChapter)
-        }
-      } else if (mode === 'prepend') {
-        if (!this.displayedChaptersContent.some((c) => c.id === chapterId)) {
-          this.displayedChaptersContent.unshift(formattedChapter)
-        }
+  const isLastChapter = computed(() => {
+    return (
+      chapters.value.length > 0 &&
+      currentChapterIndex.value !== -1 &&
+      currentChapterIndex.value === chapters.value.length - 1
+    )
+  })
+
+  const chaptersListForNav = computed(() => {
+    if (chapters.value.length > 0) {
+      return chapters.value.map((chapter) => ({
+        id: chapter.id,
+        title: chapter.title,
+      }))
+    }
+    return []
+  })
+
+  const canLoadMoreChaptersForward = computed(() => {
+    if (
+      displayedChaptersContent.value.length === 0 ||
+      chapters.value.length === 0
+    ) {
+      return false
+    }
+    const lastDisplayedChapter = displayedChaptersContent.value.slice(-1)[0]
+    if (!lastDisplayedChapter) return false
+    const lastOverallChapter = chapters.value.slice(-1)[0]
+    if (!lastOverallChapter) return false
+    return lastDisplayedChapter.id !== lastOverallChapter.id
+  })
+
+  // actions
+  function setBookData(title, chaptersFromDB, bookId) {
+    bookTitle.value = title
+    chapters.value = chaptersFromDB.map((ch) => ({ ...ch, bookId }))
+    cachedBookId.value = bookId
+    displayedChaptersContent.value = []
+  }
+
+  function _formatChapterForDisplay(chapterData) {
+    if (!chapterData || !chapterData.content) return null
+    const lines = chapterData.content
+      .split('\n')
+      .filter((line) => line.trim() !== '')
+    const formattedLines = []
+    lines.forEach((line) => {
+      formattedLines.push({ text: line, isTitle: false })
+    })
+    return {
+      id: chapterData.id,
+      title: chapterData.title,
+      lines: formattedLines,
+      bookId: chapterData.bookId || cachedBookId.value,
+    }
+  }
+
+  function loadChapterIntoDisplay(chapterId, mode = 'replace') {
+    const chapterData = chapters.value.find((c) => c.id === chapterId)
+    if (!chapterData) {
+      console.warn(`Chapter ${chapterId} not found in full chapter list.`)
+      return
+    }
+    const formattedChapter = _formatChapterForDisplay(chapterData)
+    if (!formattedChapter) {
+      console.warn(`Failed to format chapter ${chapterId} for display.`)
+      return
+    }
+
+    if (mode === 'replace') {
+      displayedChaptersContent.value = [formattedChapter]
+    } else if (mode === 'append') {
+      if (!displayedChaptersContent.value.some((c) => c.id === chapterId)) {
+        displayedChaptersContent.value.push(formattedChapter)
       }
-    },
-
-    setCurrentChapterId(id) {
-      if (this.currentChapterId !== id) {
-        this.currentChapterId = id
+    } else if (mode === 'prepend') {
+      if (!displayedChaptersContent.value.some((c) => c.id === chapterId)) {
+        displayedChaptersContent.value.unshift(formattedChapter)
       }
-    },
+    }
+  }
 
-    goToChapterById(chapterId) {
-      this.navigationSource = 'TOC_OR_KEYBOARD'
-      this.setCurrentChapterId(chapterId)
-    },
+  function setCurrentChapterId(id) {
+    if (currentChapterId.value !== id) {
+      currentChapterId.value = id
+    }
+  }
 
-    goToPrevChapter() {
-      const currentIndex = this.currentChapterIndex
-      if (currentIndex > 0) {
-        const prevChapterMeta = this.chapters[currentIndex - 1]
-        if (prevChapterMeta) {
-          this.setNavigationSource('KEYBOARD')
-          if (
-            !this.displayedChaptersContent.some(
-              (c) => c.id === prevChapterMeta.id,
-            )
-          ) {
-            const formattedChapter =
-              this._formatChapterForDisplay(prevChapterMeta)
-            if (formattedChapter) {
-              this.displayedChaptersContent.unshift(formattedChapter)
-            }
+  function goToChapterById(chapterId) {
+    navigationSource.value = 'TOC_OR_KEYBOARD'
+    setCurrentChapterId(chapterId)
+  }
+
+  function goToPrevChapter() {
+    const currentIndex = currentChapterIndex.value
+    if (currentIndex > 0) {
+      const prevChapterMeta = chapters.value[currentIndex - 1]
+      if (prevChapterMeta) {
+        setNavigationSource('KEYBOARD')
+        if (
+          !displayedChaptersContent.value.some(
+            (c) => c.id === prevChapterMeta.id,
+          )
+        ) {
+          const formattedChapter = _formatChapterForDisplay(prevChapterMeta)
+          if (formattedChapter) {
+            displayedChaptersContent.value.unshift(formattedChapter)
           }
-          this.setCurrentChapterId(prevChapterMeta.id)
         }
+        setCurrentChapterId(prevChapterMeta.id)
       }
-    },
+    }
+  }
 
-    goToNextChapter() {
-      const currentIndex = this.currentChapterIndex
-      if (currentIndex !== -1 && currentIndex < this.chapters.length - 1) {
-        const nextChapterMeta = this.chapters[currentIndex + 1]
-        if (nextChapterMeta) {
-          this.setNavigationSource('KEYBOARD')
-          if (
-            !this.displayedChaptersContent.some(
-              (c) => c.id === nextChapterMeta.id,
-            )
-          ) {
-            const formattedChapter =
-              this._formatChapterForDisplay(nextChapterMeta)
-            if (formattedChapter) {
-              this.displayedChaptersContent.push(formattedChapter)
-            }
+  function goToNextChapter() {
+    const currentIndex = currentChapterIndex.value
+    if (currentIndex !== -1 && currentIndex < chapters.value.length - 1) {
+      const nextChapterMeta = chapters.value[currentIndex + 1]
+      if (nextChapterMeta) {
+        setNavigationSource('KEYBOARD')
+        if (
+          !displayedChaptersContent.value.some(
+            (c) => c.id === nextChapterMeta.id,
+          )
+        ) {
+          const formattedChapter = _formatChapterForDisplay(nextChapterMeta)
+          if (formattedChapter) {
+            displayedChaptersContent.value.push(formattedChapter)
           }
-          this.setCurrentChapterId(nextChapterMeta.id)
         }
+        setCurrentChapterId(nextChapterMeta.id)
       }
-    },
+    }
+  }
 
-    setNavigationSource(source) {
-      this.navigationSource = source
-    },
+  function setNavigationSource(source) {
+    navigationSource.value = source
+  }
 
-    toggleDrawer() {
-      this.isDrawerVisible = !this.isDrawerVisible
-    },
+  function toggleDrawer() {
+    isDrawerVisible.value = !isDrawerVisible.value
+  }
 
-    clearCache() {
-      this.bookTitle = ''
-      this.chapters = []
-      this.currentChapterId = null
-      this.cachedBookId = null
-      this.displayedChaptersContent = []
-      this.navigationSource = 'scroll'
-    },
-  },
+  function clearCache() {
+    bookTitle.value = ''
+    chapters.value = []
+    currentChapterId.value = null
+    cachedBookId.value = null
+    displayedChaptersContent.value = []
+    navigationSource.value = 'scroll'
+  }
+
+  return {
+    // state
+    bookTitle,
+    chapters,
+    currentChapterId,
+    isDrawerVisible,
+    cachedBookId,
+    displayedChaptersContent,
+    navigationSource,
+
+    // getters
+    currentChapter,
+    currentChapterIndex,
+    isFirstChapter,
+    isLastChapter,
+    chaptersListForNav,
+    canLoadMoreChaptersForward,
+
+    // actions
+    setBookData,
+    loadChapterIntoDisplay,
+    setCurrentChapterId,
+    goToChapterById,
+    goToPrevChapter,
+    goToNextChapter,
+    setNavigationSource,
+    toggleDrawer,
+    clearCache,
+  }
 })
