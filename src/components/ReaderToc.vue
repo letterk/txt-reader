@@ -48,13 +48,9 @@
   const handleChapterClick = (chapterId) => {
     bookStore.goToChapterById(chapterId)
     bookStore.toggleDrawer()
-
-    nextTick(() => {
-      scrollToCurrentChapter()
-    })
   }
 
-  const scrollToCurrentChapter = () => {
+  const scrollToCurrentChapterInToc = () => {
     if (
       bookStore.currentChapterId !== null &&
       bookStore.chaptersListForNav.length > 0
@@ -64,10 +60,6 @@
         const element = document.getElementById(itemId)
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        } else {
-          console.warn(
-            `未找到章节元素: ${itemId} 对应 ID ${bookStore.currentChapterId}`,
-          )
         }
       })
     }
@@ -77,7 +69,7 @@
     () => bookStore.currentChapterId,
     (newId, oldId) => {
       if (newId !== oldId && bookStore.isDrawerVisible) {
-        scrollToCurrentChapter()
+        scrollToCurrentChapterInToc()
       }
     },
   )
@@ -86,7 +78,7 @@
     () => bookStore.isDrawerVisible,
     (isVisible) => {
       if (isVisible) {
-        scrollToCurrentChapter()
+        scrollToCurrentChapterInToc()
       }
     },
   )

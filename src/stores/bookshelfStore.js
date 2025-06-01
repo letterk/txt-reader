@@ -87,9 +87,8 @@ export const useBookshelfStore = defineStore('bookshelf', {
           uploadTime: new Date().toISOString(),
         }
 
-        const bookId = await dbAddBook(bookData, fileContent)
+        await dbAddBook(bookData, fileContent)
 
-        console.log(`书籍《${bookTitle}》保存成功，ID: ${bookId}`)
         this.setUploadMessage(`书籍《${bookTitle}》上传并保存成功！`, 'success')
 
         this.isBooksCached = false
@@ -117,7 +116,6 @@ export const useBookshelfStore = defineStore('bookshelf', {
         this.setLoading(true)
         try {
           await deleteBookById(bookId)
-          console.log(`书籍 ID ${bookId} 删除成功`)
 
           this.isBooksCached = false
           await this.fetchBooks()
@@ -145,7 +143,6 @@ export const useBookshelfStore = defineStore('bookshelf', {
         this.setLoading(true)
         try {
           await clearBooks()
-          console.log('书架已清空')
 
           this.books = []
 
