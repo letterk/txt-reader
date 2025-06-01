@@ -62,23 +62,35 @@ export function useReaderLogic(props) {
     bookStore.setCurrentChapterId(chapterId)
   }, 100)
 
-  const updateRoute = (bookId, chapterId) => {
+  const updateRouteAndTitle = async (bookId, chapterId) => {
+    const targetRoute = {
+      name: 'Reader',
+      params: {
+        bookId,
+        chapterId: chapterId ? chapterId.toString() : undefined,
+      },
+    }
+
     if (
       route.params.bookId !== bookId ||
       (chapterId !== undefined &&
         route.params.chapterId !== chapterId.toString()) ||
       (chapterId === undefined && route.params.chapterId !== undefined)
     ) {
-      router
-        .replace({
-          name: 'Reader',
-          params: {
-            bookId,
-            chapterId: chapterId ? chapterId.toString() : undefined,
-          },
-        })
-        .catch((err) => console.error('更新路由失败:', err))
+      await router.replace(targetRoute).catch((err) => {
+        console.error('更新路由失败:', err)
+      })
     }
+
+    let pageTitle = '简单小说阅读器'
+    if (bookStore.bookTitle) {
+      pageTitle = bookStore.bookTitle
+      const currentChapter = bookStore.chapters.find((c) => c.id === chapterId)
+      if (currentChapter && currentChapter.title) {
+        pageTitle += ` - ${currentChapter.title}`
+      }
+    }
+    document.title = pageTitle
   }
 
   const scrollToChapterElement = (chapterId, behavior = 'smooth') => {
@@ -274,7 +286,7 @@ export function useReaderLogic(props) {
 
   watch(
     () => bookStore.currentChapterId,
-    (newId, oldId) => {
+    async (newId, oldId) => {
       if (newId === null && bookStore.bookTitle) {
         router.replace({ name: 'Bookshelf' })
         return
@@ -285,7 +297,7 @@ export function useReaderLogic(props) {
         saveLastReadChapterToStorage(bookStore.cachedBookId, newId)
       }
 
-      updateRoute(bookStore.cachedBookId, newId)
+      await updateRouteAndTitle(bookStore.cachedBookId, newId)
 
       const source = bookStore.navigationSource
 

@@ -88,4 +88,5 @@
   const triggerFileInput = () => {
     fileInput.value.click()
   }
+  document.title = '我的书架 - 简单小说阅读器'
 </script>
