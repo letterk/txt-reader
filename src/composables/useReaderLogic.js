@@ -1,5 +1,5 @@
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useBookStore } from '../stores/bookStore'
 import { getBookById } from '../utils/database'
 import { setupKeyboardListener } from '../utils/keyboardHandler'
@@ -46,7 +46,6 @@ function getLastReadChapterFromStorage(bookId) {
 
 export function useReaderLogic(props) {
   const bookStore = useBookStore()
-  const route = useRoute()
   const router = useRouter()
 
   const isLoadingInitial = ref(false)
@@ -63,19 +62,6 @@ export function useReaderLogic(props) {
   }, 100)
 
   const updateRouteAndTitle = async (bookId, chapterId) => {
-    const targetRoute = {
-      name: 'Reader',
-      params: {
-        bookId,
-      },
-    }
-
-    if (route.params.bookId !== bookId) {
-      await router.replace(targetRoute).catch((err) => {
-        console.error('更新路由失败:', err)
-      })
-    }
-
     let pageTitle = '简单小说阅读器'
     if (bookStore.bookTitle) {
       pageTitle = bookStore.bookTitle
@@ -185,7 +171,7 @@ export function useReaderLogic(props) {
 
   const loadBook = async (bookId) => {
     isLoadingInitial.value = true
-    bookStore.clearCache()
+    bookStore.clearBookData()
 
     try {
       const book = await getBookById(bookId)
@@ -193,7 +179,7 @@ export function useReaderLogic(props) {
         throw new Error(book ? '书籍没有章节数据' : '书籍不存在')
       }
 
-      bookStore.setBookData(book.bookTitle, book.chapters, book.id)
+      bookStore.setBookData(book.bookTitle, book.chapters)
 
       let chapterIdToLoad
       let navigationSourceReason = 'INITIAL_LOAD'
@@ -214,7 +200,7 @@ export function useReaderLogic(props) {
       bookStore.setCurrentChapterId(chapterIdToLoad)
     } catch (error) {
       console.error('加载书籍失败:', error)
-      bookStore.clearCache()
+      bookStore.clearBookData()
       router
         .replace({ name: 'Bookshelf' })
         .catch((err) => console.error('导航回书架页失败:', err))
@@ -226,10 +212,9 @@ export function useReaderLogic(props) {
   watch(
     () => props.bookId,
     (newBookId) => {
-      if (newBookId && newBookId !== bookStore.cachedBookId) {
+      if (newBookId) {
         loadBook(newBookId)
       }
-      // updateRouteAndTitle(bookStore.cachedBookId, bookStore.currentChapterId)
     },
     { immediate: true },
   )
@@ -243,11 +228,11 @@ export function useReaderLogic(props) {
       }
       if (newId === null || isLoadingInitial.value) return
 
-      if (bookStore.cachedBookId && newId !== oldId) {
-        saveLastReadChapterToStorage(bookStore.cachedBookId, newId)
+      if (props.bookId && newId !== oldId) {
+        saveLastReadChapterToStorage(props.bookId, newId)
       }
 
-      await updateRouteAndTitle(bookStore.cachedBookId, newId)
+      await updateRouteAndTitle(props.bookId, newId)
 
       const source = bookStore.navigationSource
 
@@ -259,7 +244,6 @@ export function useReaderLogic(props) {
         bookStore.loadChapterIntoDisplay(newId, 'replace')
         scrollToChapterElement(newId, 'auto')
       } else if (source === 'TOC_OR_KEYBOARD' || source === 'KEYBOARD') {
-        // For TOC or Keyboard navigation, ensure the chapter is displayed if not already
         if (!bookStore.displayedChaptersContent.some((c) => c.id === newId)) {
           bookStore.loadChapterIntoDisplay(newId, 'replace')
         }
