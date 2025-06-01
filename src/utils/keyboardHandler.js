@@ -30,7 +30,7 @@ export function setupKeyboardListener(bookStore, isLoadingRef, router) {
 
       case 'b':
         if (router && router.currentRoute.value.name === 'Reader') {
-          router.push({ name: 'Bookshelf' })
+          router.replace({ name: 'Bookshelf' })
           event.preventDefault()
         }
         break

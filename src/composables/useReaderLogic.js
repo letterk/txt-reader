@@ -67,16 +67,10 @@ export function useReaderLogic(props) {
       name: 'Reader',
       params: {
         bookId,
-        chapterId: chapterId ? chapterId.toString() : undefined,
       },
     }
 
-    if (
-      route.params.bookId !== bookId ||
-      (chapterId !== undefined &&
-        route.params.chapterId !== chapterId.toString()) ||
-      (chapterId === undefined && route.params.chapterId !== undefined)
-    ) {
+    if (route.params.bookId !== bookId) {
       await router.replace(targetRoute).catch((err) => {
         console.error('更新路由失败:', err)
       })
@@ -189,7 +183,7 @@ export function useReaderLogic(props) {
     })
   }
 
-  const loadBook = async (bookId, targetChapterIdStr) => {
+  const loadBook = async (bookId) => {
     isLoadingInitial.value = true
     bookStore.clearCache()
 
@@ -204,27 +198,14 @@ export function useReaderLogic(props) {
       let chapterIdToLoad
       let navigationSourceReason = 'INITIAL_LOAD'
 
-      if (targetChapterIdStr) {
-        const numChapterId = parseInt(targetChapterIdStr, 10)
-        if (bookStore.chapters.some((c) => c.id === numChapterId)) {
-          chapterIdToLoad = numChapterId
-          navigationSourceReason = 'URL_PROP'
-        }
-      }
-
-      if (chapterIdToLoad === undefined) {
-        const lastReadId = getLastReadChapterFromStorage(bookId)
-        updateRouteAndTitle(bookId, lastReadId)
-        if (
-          lastReadId !== undefined &&
-          bookStore.chapters.some((c) => c.id === lastReadId)
-        ) {
-          chapterIdToLoad = lastReadId
-          navigationSourceReason = 'LAST_READ_STORAGE'
-        }
-      }
-
-      if (chapterIdToLoad === undefined) {
+      const lastReadId = getLastReadChapterFromStorage(bookId)
+      if (
+        lastReadId !== undefined &&
+        bookStore.chapters.some((c) => c.id === lastReadId)
+      ) {
+        chapterIdToLoad = lastReadId
+        navigationSourceReason = 'LAST_READ_STORAGE'
+      } else {
         chapterIdToLoad = bookStore.chapters[0].id
         navigationSourceReason = 'INITIAL_LOAD_FIRST_CHAPTER'
       }
@@ -246,45 +227,11 @@ export function useReaderLogic(props) {
     () => props.bookId,
     (newBookId) => {
       if (newBookId && newBookId !== bookStore.cachedBookId) {
-        loadBook(newBookId, props.chapterId)
-      } else if (
-        newBookId &&
-        newBookId === bookStore.cachedBookId &&
-        props.chapterId
-      ) {
-        const targetChapterId = parseInt(props.chapterId, 10)
-
-        if (
-          bookStore.chapters.some((c) => c.id === targetChapterId) &&
-          targetChapterId !== bookStore.currentChapterId
-        ) {
-          bookStore.setNavigationSource('URL_PROP')
-          bookStore.setCurrentChapterId(targetChapterId)
-        }
+        loadBook(newBookId)
       }
-      updateRouteAndTitle(bookStore.cachedBookId, bookStore.currentChapterId)
+      // updateRouteAndTitle(bookStore.cachedBookId, bookStore.currentChapterId)
     },
     { immediate: true },
-  )
-
-  watch(
-    () => props.chapterId,
-    (newChapterIdStr, oldChapterIdStr) => {
-      if (
-        props.bookId === bookStore.cachedBookId &&
-        newChapterIdStr &&
-        newChapterIdStr !== oldChapterIdStr
-      ) {
-        const targetChapterId = parseInt(newChapterIdStr, 10)
-        if (
-          bookStore.chapters.some((c) => c.id === targetChapterId) &&
-          targetChapterId !== bookStore.currentChapterId
-        ) {
-          bookStore.setNavigationSource('URL_PROP')
-          bookStore.setCurrentChapterId(targetChapterId)
-        }
-      }
-    },
   )
 
   watch(
@@ -306,21 +253,16 @@ export function useReaderLogic(props) {
 
       if (
         source === 'INITIAL_LOAD' ||
-        source === 'URL_PROP' ||
-        source === 'TOC_OR_KEYBOARD' ||
         source === 'LAST_READ_STORAGE' ||
         source === 'INITIAL_LOAD_FIRST_CHAPTER'
       ) {
         bookStore.loadChapterIntoDisplay(newId, 'replace')
-        const behavior =
-          source === 'INITIAL_LOAD' ||
-          source === 'URL_PROP' ||
-          source === 'LAST_READ_STORAGE' ||
-          source === 'INITIAL_LOAD_FIRST_CHAPTER'
-            ? 'auto'
-            : 'smooth'
-        scrollToChapterElement(newId, behavior)
-      } else if (source === 'KEYBOARD') {
+        scrollToChapterElement(newId, 'auto')
+      } else if (source === 'TOC_OR_KEYBOARD' || source === 'KEYBOARD') {
+        // For TOC or Keyboard navigation, ensure the chapter is displayed if not already
+        if (!bookStore.displayedChaptersContent.some((c) => c.id === newId)) {
+          bookStore.loadChapterIntoDisplay(newId, 'replace')
+        }
         scrollToChapterElement(newId, 'smooth')
       }
 

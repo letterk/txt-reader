@@ -40,11 +40,6 @@
       type: String,
       required: true,
     },
-    chapterId: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
   })
 
   const {
