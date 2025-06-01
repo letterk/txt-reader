@@ -107,6 +107,10 @@ export const useBookStore = defineStore('book', {
         if (!this.displayedChaptersContent.some((c) => c.id === chapterId)) {
           this.displayedChaptersContent.push(formattedChapter)
         }
+      } else if (mode === 'prepend') {
+        if (!this.displayedChaptersContent.some((c) => c.id === chapterId)) {
+          this.displayedChaptersContent.unshift(formattedChapter)
+        }
       }
     },
 
@@ -124,10 +128,21 @@ export const useBookStore = defineStore('book', {
     goToPrevChapter() {
       const currentIndex = this.currentChapterIndex
       if (currentIndex > 0) {
-        const prevChapterId = this.chapters[currentIndex - 1]?.id
-        if (prevChapterId) {
-          this.navigationSource = 'KEYBOARD'
-          this.setCurrentChapterId(prevChapterId)
+        const prevChapterMeta = this.chapters[currentIndex - 1]
+        if (prevChapterMeta) {
+          this.setNavigationSource('KEYBOARD')
+          if (
+            !this.displayedChaptersContent.some(
+              (c) => c.id === prevChapterMeta.id,
+            )
+          ) {
+            const formattedChapter =
+              this._formatChapterForDisplay(prevChapterMeta)
+            if (formattedChapter) {
+              this.displayedChaptersContent.unshift(formattedChapter)
+            }
+          }
+          this.setCurrentChapterId(prevChapterMeta.id)
         }
       }
     },
@@ -135,10 +150,21 @@ export const useBookStore = defineStore('book', {
     goToNextChapter() {
       const currentIndex = this.currentChapterIndex
       if (currentIndex !== -1 && currentIndex < this.chapters.length - 1) {
-        const nextChapterId = this.chapters[currentIndex + 1]?.id
-        if (nextChapterId) {
-          this.navigationSource = 'KEYBOARD'
-          this.setCurrentChapterId(nextChapterId)
+        const nextChapterMeta = this.chapters[currentIndex + 1]
+        if (nextChapterMeta) {
+          this.setNavigationSource('KEYBOARD')
+          if (
+            !this.displayedChaptersContent.some(
+              (c) => c.id === nextChapterMeta.id,
+            )
+          ) {
+            const formattedChapter =
+              this._formatChapterForDisplay(nextChapterMeta)
+            if (formattedChapter) {
+              this.displayedChaptersContent.push(formattedChapter)
+            }
+          }
+          this.setCurrentChapterId(nextChapterMeta.id)
         }
       }
     },

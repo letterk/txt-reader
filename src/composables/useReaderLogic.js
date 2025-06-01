@@ -6,12 +6,16 @@ import { setupKeyboardListener } from '../utils/keyboardHandler'
 
 function debounce(fn, delay) {
   let timerId
-  return function (...args) {
+  const debouncedFn = function (...args) {
     clearTimeout(timerId)
     timerId = setTimeout(() => {
       fn.apply(this, args)
     }, delay)
   }
+  debouncedFn.cancel = () => {
+    clearTimeout(timerId)
+  }
+  return debouncedFn
 }
 
 export function useReaderLogic(props) {
@@ -243,14 +247,16 @@ export function useReaderLogic(props) {
       if (
         source === 'INITIAL_LOAD' ||
         source === 'URL_PROP' ||
-        source === 'TOC_OR_KEYBOARD' ||
-        source === 'KEYBOARD'
+        source === 'TOC_OR_KEYBOARD'
       ) {
         bookStore.loadChapterIntoDisplay(newId, 'replace')
         const behavior =
           source === 'INITIAL_LOAD' || source === 'URL_PROP' ? 'auto' : 'smooth'
         scrollToChapterElement(newId, behavior)
+      } else if (source === 'KEYBOARD') {
+        scrollToChapterElement(newId, 'smooth')
       }
+
       if (source !== 'scroll') {
         bookStore.setNavigationSource('scroll')
       }
@@ -281,7 +287,7 @@ export function useReaderLogic(props) {
     if (nextChapterObserver) nextChapterObserver.disconnect()
     if (currentChapterObserver) currentChapterObserver.disconnect()
 
-    debouncedSetCurrentChapterId.cancel && debouncedSetCurrentChapterId.cancel()
+    debouncedSetCurrentChapterId.cancel()
   })
 
   return {
