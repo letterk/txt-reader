@@ -43,6 +43,18 @@
       目录
     </button>
   </div>
+
+  <div
+    class="fixed right-20 top-50 flex flex-col gap-2 opacity-20 hover:opacity-100"
+  >
+    <div>
+      <p>快捷键说明：</p>
+      <p>←：上一章</p>
+      <p>→：下一章</p>
+      <p>Enter：打开目录</p>
+      <p>B： 返回书架</p>
+    </div>
+  </div>
 </template>
 
 <script setup>
