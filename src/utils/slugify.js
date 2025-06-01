@@ -1,6 +1,6 @@
-import { pinyin } from 'pinyin-pro'
+export async function slugify(text) {
+  const { pinyin } = await import('pinyin-pro')
 
-export function slugify(text) {
   const pinyinText = pinyin(text, { toneType: 'none' })
 
   let slug = pinyinText.toLowerCase()

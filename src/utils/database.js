@@ -26,7 +26,7 @@ export async function addBook(bookData, fileContent) {
       throw error
     }
 
-    const baseId = slugify(bookData.bookTitle)
+    const baseId = await slugify(bookData.bookTitle)
     let finalId = baseId
     let counter = 1
 
