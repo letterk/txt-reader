@@ -6,7 +6,7 @@
 
     <button
       v-if="!isDrawerVisible"
-      class="fixed left-4 top-4 h-10 w-10 rounded-full text-xl hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-700"
+      class="fixed left-4 top-4 h-10 w-10 rounded-full text-xl opacity-50 grayscale hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-700"
       @click="toggleTheme"
     >
       🎨

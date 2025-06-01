@@ -28,10 +28,26 @@
   </div>
 
   <ReaderToc v-if="bookStore.bookTitle && !isLoadingInitial" />
+
+  <div class="text-l fixed right-20 top-20 m-5 flex flex-col gap-2 opacity-60">
+    <button
+      class="rounded px-10 py-2 hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-700"
+      @click="goToBookshelf"
+    >
+      书架
+    </button>
+    <button
+      class="rounded px-10 py-2 hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-700"
+      @click="bookStore.toggleDrawer()"
+    >
+      目录
+    </button>
+  </div>
 </template>
 
 <script setup>
   import { defineProps } from 'vue'
+  import { useRouter } from 'vue-router'
   import { useReaderLogic } from '../composables/useReaderLogic'
   import ReaderToc from '../components/ReaderToc.vue'
 
@@ -42,6 +58,8 @@
     },
   })
 
+  const router = useRouter()
+
   const {
     bookStore,
     isLoadingInitial,
@@ -49,4 +67,8 @@
     nextChapterSentinelRef,
     readerContainerRef,
   } = useReaderLogic(props)
+
+  const goToBookshelf = () => {
+    router.replace({ name: 'Bookshelf' })
+  }
 </script>
