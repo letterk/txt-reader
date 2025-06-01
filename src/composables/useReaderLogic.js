@@ -4,6 +4,8 @@ import { useBookStore } from '../stores/bookStore'
 import { getBookById } from '../utils/database'
 import { setupKeyboardListener } from '../utils/keyboardHandler'
 
+const LAST_READ_CHAPTERS_KEY = 'lastReadChapters'
+
 function debounce(fn, delay) {
   let timerId
   const debouncedFn = function (...args) {
@@ -16,6 +18,30 @@ function debounce(fn, delay) {
     clearTimeout(timerId)
   }
   return debouncedFn
+}
+
+function saveLastReadChapterToStorage(bookId, chapterId) {
+  if (!bookId || chapterId === null || chapterId === undefined) return
+  try {
+    const allLastRead =
+      JSON.parse(localStorage.getItem(LAST_READ_CHAPTERS_KEY)) || {}
+    allLastRead[bookId] = chapterId
+    localStorage.setItem(LAST_READ_CHAPTERS_KEY, JSON.stringify(allLastRead))
+  } catch (e) {
+    console.error('保存最后阅读章节失败:', e)
+  }
+}
+
+function getLastReadChapterFromStorage(bookId) {
+  if (!bookId) return undefined
+  try {
+    const allLastRead =
+      JSON.parse(localStorage.getItem(LAST_READ_CHAPTERS_KEY)) || {}
+    return allLastRead[bookId]
+  } catch (e) {
+    console.error('获取最后阅读章节失败:', e)
+    return undefined
+  }
 }
 
 export function useReaderLogic(props) {
@@ -164,21 +190,33 @@ export function useReaderLogic(props) {
       bookStore.setBookData(book.bookTitle, book.chapters, book.id)
 
       let chapterIdToLoad
+      let navigationSourceReason = 'INITIAL_LOAD'
+
       if (targetChapterIdStr) {
         const numChapterId = parseInt(targetChapterIdStr, 10)
         if (bookStore.chapters.some((c) => c.id === numChapterId)) {
           chapterIdToLoad = numChapterId
-        } else {
-          console.warn(`目标章节 ID ${targetChapterIdStr} 不存在，加载第一章`)
-          chapterIdToLoad = bookStore.chapters[0].id
+          navigationSourceReason = 'URL_PROP'
         }
-      } else {
-        chapterIdToLoad = bookStore.chapters[0].id
       }
 
-      bookStore.setNavigationSource(
-        targetChapterIdStr ? 'URL_PROP' : 'INITIAL_LOAD',
-      )
+      if (chapterIdToLoad === undefined) {
+        const lastReadId = getLastReadChapterFromStorage(bookId)
+        if (
+          lastReadId !== undefined &&
+          bookStore.chapters.some((c) => c.id === lastReadId)
+        ) {
+          chapterIdToLoad = lastReadId
+          navigationSourceReason = 'LAST_READ_STORAGE'
+        }
+      }
+
+      if (chapterIdToLoad === undefined) {
+        chapterIdToLoad = bookStore.chapters[0].id
+        navigationSourceReason = 'INITIAL_LOAD_FIRST_CHAPTER'
+      }
+
+      bookStore.setNavigationSource(navigationSourceReason)
       bookStore.setCurrentChapterId(chapterIdToLoad)
     } catch (error) {
       console.error('加载书籍失败:', error)
@@ -202,7 +240,10 @@ export function useReaderLogic(props) {
         props.chapterId
       ) {
         const targetChapterId = parseInt(props.chapterId, 10)
-        if (targetChapterId !== bookStore.currentChapterId) {
+        if (
+          bookStore.chapters.some((c) => c.id === targetChapterId) &&
+          targetChapterId !== bookStore.currentChapterId
+        ) {
           bookStore.setNavigationSource('URL_PROP')
           bookStore.setCurrentChapterId(targetChapterId)
         }
@@ -233,12 +274,16 @@ export function useReaderLogic(props) {
 
   watch(
     () => bookStore.currentChapterId,
-    (newId) => {
+    (newId, oldId) => {
       if (newId === null && bookStore.bookTitle) {
         router.replace({ name: 'Bookshelf' })
         return
       }
       if (newId === null || isLoadingInitial.value) return
+
+      if (bookStore.cachedBookId && newId !== oldId) {
+        saveLastReadChapterToStorage(bookStore.cachedBookId, newId)
+      }
 
       updateRoute(bookStore.cachedBookId, newId)
 
@@ -247,11 +292,18 @@ export function useReaderLogic(props) {
       if (
         source === 'INITIAL_LOAD' ||
         source === 'URL_PROP' ||
-        source === 'TOC_OR_KEYBOARD'
+        source === 'TOC_OR_KEYBOARD' ||
+        source === 'LAST_READ_STORAGE' ||
+        source === 'INITIAL_LOAD_FIRST_CHAPTER'
       ) {
         bookStore.loadChapterIntoDisplay(newId, 'replace')
         const behavior =
-          source === 'INITIAL_LOAD' || source === 'URL_PROP' ? 'auto' : 'smooth'
+          source === 'INITIAL_LOAD' ||
+          source === 'URL_PROP' ||
+          source === 'LAST_READ_STORAGE' ||
+          source === 'INITIAL_LOAD_FIRST_CHAPTER'
+            ? 'auto'
+            : 'smooth'
         scrollToChapterElement(newId, behavior)
       } else if (source === 'KEYBOARD') {
         scrollToChapterElement(newId, 'smooth')
