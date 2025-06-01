@@ -77,14 +77,18 @@ export const useBookStore = defineStore('book', () => {
   }
 
   function _formatChapterForDisplay(chapterData) {
-    if (!chapterData || !chapterData.content) return null
-    const lines = chapterData.content
-      .split('\n')
-      .filter((line) => line.trim() !== '')
+    if (!chapterData) {
+      return null
+    }
+
+    const contentValue = chapterData.content || ''
+
+    const lines = contentValue.split('\n').filter((line) => line.trim() !== '')
     const formattedLines = []
     lines.forEach((line) => {
       formattedLines.push({ text: line, isTitle: false })
     })
+
     return {
       id: chapterData.id,
       title: chapterData.title,
