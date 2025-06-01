@@ -214,6 +214,7 @@ export function useReaderLogic(props) {
 
       if (chapterIdToLoad === undefined) {
         const lastReadId = getLastReadChapterFromStorage(bookId)
+        updateRouteAndTitle(bookId, lastReadId)
         if (
           lastReadId !== undefined &&
           bookStore.chapters.some((c) => c.id === lastReadId)
@@ -252,6 +253,7 @@ export function useReaderLogic(props) {
         props.chapterId
       ) {
         const targetChapterId = parseInt(props.chapterId, 10)
+
         if (
           bookStore.chapters.some((c) => c.id === targetChapterId) &&
           targetChapterId !== bookStore.currentChapterId
@@ -260,6 +262,7 @@ export function useReaderLogic(props) {
           bookStore.setCurrentChapterId(targetChapterId)
         }
       }
+      updateRouteAndTitle(bookStore.cachedBookId, bookStore.currentChapterId)
     },
     { immediate: true },
   )
