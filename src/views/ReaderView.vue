@@ -17,8 +17,6 @@
     </div>
   </div>
 
-  <ReaderNav v-if="bookStore.bookTitle && !isLoading" />
-
   <ReaderToc v-if="bookStore.bookTitle && !isLoading" />
 </template>
 
@@ -27,7 +25,6 @@
 
   import { useReaderLogic } from '../composables/useReaderLogic'
 
-  import ReaderNav from '../components/ReaderNav.vue'
   import ReaderToc from '../components/ReaderToc.vue'
 
   const props = defineProps({
