@@ -1,6 +1,11 @@
-export function setupKeyboardListener(bookStore, isLoadingRef, router) {
+export function setupKeyboardListener(
+  bookStore,
+  isLoadingRef,
+  router,
+  isSettingsVisibleRef,
+) {
   const handleKeyDown = (event) => {
-    if (isLoadingRef.value) {
+    if (isLoadingRef.value || isSettingsVisibleRef.value) {
       return
     }
 

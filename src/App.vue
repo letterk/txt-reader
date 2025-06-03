@@ -1,13 +1,14 @@
 <template>
-  <div :class="theme === 'dark' ? 'dark' : 'light'" class="min-h-screen">
-    <div class="mx-auto w-800px">
-      <router-view />
-    </div>
+  <div
+    :class="settingsStore.theme === 'dark' ? 'dark' : 'light'"
+    class="min-h-screen"
+  >
+    <router-view />
 
     <button
-      v-if="!isDrawerVisible"
+      v-if="!bookStore.isDrawerVisible"
       class="fixed left-4 top-4 h-10 w-10 rounded-full text-xl opacity-50 grayscale hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-700"
-      @click="toggleTheme"
+      @click="settingsStore.toggleTheme"
     >
       🎨
     </button>
@@ -15,9 +16,11 @@
 </template>
 
 <script setup>
-  import { useGlobalEffects } from './composables/useGlobalEffects'
+  import { useBookStore } from './stores/bookStore'
+  import { useSettingsStore } from './stores/settingsStore'
 
-  const { theme, toggleTheme, isDrawerVisible } = useGlobalEffects()
+  const bookStore = useBookStore()
+  const settingsStore = useSettingsStore()
 </script>
 
 <style scoped>

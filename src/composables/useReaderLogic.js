@@ -50,6 +50,7 @@ export function useReaderLogic(props) {
 
   const isLoadingInitial = ref(false)
   const isLoadingMore = ref(false)
+  const isSettingsVisible = ref(false) // 添加一个 ref 来跟踪设置面板的可见性
 
   const readerContainerRef = ref(null)
   const nextChapterSentinelRef = ref(null)
@@ -271,6 +272,7 @@ export function useReaderLogic(props) {
       bookStore,
       isLoadingInitial,
       router,
+      isSettingsVisible, // 将 isSettingsVisible ref 传递给键盘监听器
     )
     bookStore.isDrawerVisible = false
   })
@@ -289,5 +291,6 @@ export function useReaderLogic(props) {
     isLoadingMore,
     readerContainerRef,
     nextChapterSentinelRef,
+    isSettingsVisible, // 导出 isSettingsVisible ref
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full flex flex-col py-8">
+  <div class="mx-auto w-60% flex flex-col py-8">
     <h1 class="mb-8 text-center text-4xl font-bold">我的书架</h1>
 
     <div class="mb-6 text-center">
