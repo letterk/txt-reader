@@ -1,4 +1,3 @@
-// eslint.config.js
 import js from '@eslint/js'
 import pluginVue from 'eslint-plugin-vue'
 import eslintConfigPrettier from 'eslint-config-prettier'
@@ -25,6 +24,5 @@ export default [
     rules: {},
   },
 
-  // 确保 Prettier 配置是最后一个，以覆盖其他配置中的样式规则
   eslintConfigPrettier,
 ]
