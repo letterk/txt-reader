@@ -66,6 +66,22 @@
         />
       </div>
 
+      <div class="mb-4">
+        <label
+          class="mb-2 block text-sm text-gray-700 font-medium dark:text-gray-300"
+        >
+          阅读区域宽度 (px):
+        </label>
+        <input
+          v-model.number="settingsStore.readerWidth"
+          type="number"
+          min="600"
+          max="1200"
+          step="50"
+          class="w-full border border-gray-300 rounded-md p-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+        />
+      </div>
+
       <div class="flex justify-end">
         <button
           class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"

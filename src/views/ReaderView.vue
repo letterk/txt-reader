@@ -1,5 +1,9 @@
 <template>
-  <div ref="readerContainerRef" class="mx-auto w-800px flex flex-col">
+  <div
+    ref="readerContainerRef"
+    class="mx-auto flex flex-col"
+    :style="{ width: `${settingsStore.readerWidth}px` }"
+  >
     <div
       v-for="chapter in bookStore.displayedChaptersContent"
       :id="`chapter-content-${chapter.id}`"
@@ -74,7 +78,6 @@
 </template>
 
 <script setup>
-  import { defineProps, ref } from 'vue'
   import { useRouter } from 'vue-router'
   import { useReaderLogic } from '../composables/useReaderLogic'
   import { useSettingsStore } from '../stores/settingsStore'
@@ -97,9 +100,8 @@
     isLoadingMore,
     nextChapterSentinelRef,
     readerContainerRef,
+    isSettingsVisible,
   } = useReaderLogic(props)
-
-  const isSettingsVisible = ref(false)
 
   const goToBookshelf = () => {
     router.replace({ name: 'Bookshelf' })

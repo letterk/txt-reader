@@ -48,15 +48,23 @@ export const useSettingsStore = defineStore('settings', () => {
   const lineHeight = ref(initialSettings.lineHeight || 1.2)
   const marginBottom = ref(initialSettings.marginBottom || 0.5)
   const theme = ref(initialTheme)
+  const readerWidth = ref(initialSettings.readerWidth || 800)
 
   watch(
-    [fontFamily, fontSize, lineHeight, marginBottom],
-    ([newFontFamily, newFontSize, newLineHeight, newMarginBottom]) => {
+    [fontFamily, fontSize, lineHeight, marginBottom, readerWidth],
+    ([
+      newFontFamily,
+      newFontSize,
+      newLineHeight,
+      newMarginBottom,
+      newReaderWidth,
+    ]) => {
       saveSettingsToStorage({
         fontFamily: newFontFamily,
         fontSize: newFontSize,
         lineHeight: newLineHeight,
         marginBottom: newMarginBottom,
+        readerWidth: newReaderWidth,
       })
     },
     { deep: true },
@@ -82,6 +90,10 @@ export const useSettingsStore = defineStore('settings', () => {
     marginBottom.value = value
   }
 
+  function setReaderWidth(value) {
+    readerWidth.value = value
+  }
+
   function toggleTheme() {
     theme.value = theme.value === 'dark' ? 'light' : 'dark'
   }
@@ -92,11 +104,13 @@ export const useSettingsStore = defineStore('settings', () => {
     lineHeight,
     marginBottom,
     theme,
+    readerWidth,
 
     setFontFamily,
     setFontSize,
     setLineHeight,
     setMarginBottom,
+    setReaderWidth,
     toggleTheme,
   }
 })
